@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cornertime Custom Punishment Generator</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+              900: '#881337',
+              950: '#4c0519'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Custom scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #111827;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #4b5563;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col justify-between">
+
+  <!-- Main Container -->
+  <div class="max-w-4xl mx-auto px-4 py-8 w-full">
+    
+    <!-- Header -->
+    <header class="text-center mb-8">
+      <div class="inline-flex items-center justify-center p-3 bg-brand-900/30 text-brand-500 rounded-2xl mb-4 ring-1 ring-brand-500/20">
+        <i class="fa-solid fa-hourglass-half text-3xl"></i>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">
+        Cornertime Punishment Generator
+      </h1>
+      <p class="text-slate-400 max-w-lg mx-auto text-sm sm:text-base">
+        Set the criteria for an appropriate punishment session. The result is securely encrypted into a unique Cornertime code.
+      </p>
+
+      <!-- Global Generation Counter Badge -->
+      <div class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs font-medium text-slate-400">
+        <i class="fa-solid fa-bolt text-amber-400"></i>
+        <span>Total Generated:</span>
+        <span id="counterDisplay" class="text-white font-bold">--</span>
+      </div>
+    </header>
+
+    <!-- Generator Form Container -->
+    <div class="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
+      <form id="punishmentForm" onsubmit="event.preventDefault(); generateCode();" class="space-y-6">
+        
+        <!-- Section 1: Hard Max Limit & Session Type -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <!-- Max Time Limit -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-200 mb-2">
+              <i class="fa-solid fa-stopwatch text-brand-500 mr-2"></i>Maximum Time Limit (minutes)
+            </label>
+            <p class="text-xs text-slate-400 mb-2">Strict upper limit that cannot be exceeded under any circumstances.</p>
+            <input type="number" id="maxMinutes" min="1" max="120" value="15" required
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 focus:outline-none focus:border-brand-500 transition-colors">
+          </div>
+
+          <!-- Session Type -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-200 mb-2">
+              <i class="fa-solid fa-layer-group text-brand-500 mr-2"></i>Session Type
+            </label>
+            <p class="text-xs text-slate-400 mb-2">Determines the general intent and time structure.</p>
+            <select id="sessionType" required
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-100 focus:outline-none focus:border-brand-500 transition-colors">
+              <option value="test">Test / Trial (Short trial session)</option>
+              <option value="maintenance" selected>Maintenance (Standard session)</option>
+              <option value="real">Real Punishment (Long, heavy session)</option>
+            </select>
+          </div>
+        </div>
+
+        <hr class="border-slate-800">
+
+        <!-- Section 2: Pose & Movement Penalty Severity -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <!-- Pose / Houding -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-200 mb-2">
+              <i class="fa-solid fa-person-praying text-brand-500 mr-2"></i>Required Pose
+            </label>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="cursor-pointer">
+                <input type="radio" name="pose" value="standing" checked class="peer sr-only">
+                <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-center peer-checked:border-brand-500 peer-checked:bg-brand-500/10 peer-checked:text-brand-400 transition-all">
+                  <i class="fa-solid fa-person text-lg mb-1 block"></i>
+                  <span class="text-xs font-semibold">Standing</span>
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="pose" value="kneeling" class="peer sr-only">
+                <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-center peer-checked:border-brand-500 peer-checked:bg-brand-500/10 peer-checked:text-brand-400 transition-all">
+                  <i class="fa-solid fa-person-kneeling text-lg mb-1 block"></i>
+                  <span class="text-xs font-semibold">Kneeling</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Movement Punishment Severity -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-200 mb-2">
+              <i class="fa-solid fa-triangle-exclamation text-brand-500 mr-2"></i>Movement Penalty
+            </label>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="cursor-pointer">
+                <input type="radio" name="movementSeverity" value="light" checked class="peer sr-only">
+                <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-center peer-checked:border-brand-500 peer-checked:bg-brand-500/10 peer-checked:text-brand-400 transition-all">
+                  <span class="text-xs font-semibold block">Light Penalty</span>
+                  <span class="text-[10px] text-slate-400">10s - 60s per offense</span>
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <input type="radio" name="movementSeverity" value="heavy" class="peer sr-only">
+                <div class="p-3 bg-slate-950 border border-slate-800 rounded-xl text-center peer-checked:border-brand-500 peer-checked:bg-brand-500/10 peer-checked:text-brand-400 transition-all">
+                  <span class="text-xs font-semibold block">Heavy Penalty</span>
+                  <span class="text-[10px] text-slate-400">60s - 180s per offense</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-slate-800">
+
+        <!-- Section 3: Behaviour Evaluation & Encouragement Slider -->
+        <div class="space-y-4">
+          <!-- Naughtiness Scale -->
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <label class="text-sm font-semibold text-slate-200">
+                <i class="fa-solid fa-gauge-high text-brand-500 mr-2"></i>How naughty were you? (Scale 1-5)
+              </label>
+              <span id="naughtinessValue" class="text-sm font-bold text-brand-500 bg-brand-500/10 px-2.5 py-0.5 rounded-full border border-brand-500/20">3</span>
+            </div>
+            <input type="range" id="naughtinessScale" min="1" max="5" value="3" oninput="document.getElementById('naughtinessValue').innerText = this.value"
+              class="w-full accent-brand-500 bg-slate-950 h-2 rounded-lg cursor-pointer">
+          </div>
+
+          <!-- Encouragement Probability Slider -->
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <label class="text-sm font-semibold text-slate-200">
+                <i class="fa-solid fa-comment-dots text-brand-500 mr-2"></i>Encouragement Probability
+              </label>
+              <span id="encouragementValue" class="text-sm font-bold text-brand-500 bg-brand-500/10 px-2.5 py-0.5 rounded-full border border-brand-500/20">15%</span>
+            </div>
+            <p class="text-xs text-slate-400 mb-2">Determines the chance of Cornertime giving an encouraging message during the session.</p>
+            <input type="range" id="encouragementSlider" min="0" max="100" step="5" value="15" oninput="document.getElementById('encouragementValue').innerText = this.value + '%'"
+              class="w-full accent-brand-500 bg-slate-950 h-2 rounded-lg cursor-pointer">
+          </div>
+
+          <!-- Nature of behavior -->
+          <div>
+            <label class="block text-sm font-semibold text-slate-200 mb-2">
+              <i class="fa-solid fa-list-check text-brand-500 mr-2"></i>Nature of Behavior (Select all that apply)
+            </label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition-colors">
+                <input type="checkbox" value="messy" class="behavior-check accent-brand-500 rounded">
+                <span class="text-xs text-slate-300">Messy / Sloppy</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition-colors">
+                <input type="checkbox" value="late" class="behavior-check accent-brand-500 rounded">
+                <span class="text-xs text-slate-300">Arrived Late</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition-colors">
+                <input type="checkbox" value="indecent" class="behavior-check accent-brand-500 rounded">
+                <span class="text-xs text-slate-300">Indecent</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition-colors">
+                <input type="checkbox" value="lying" class="behavior-check accent-brand-500 rounded">
+                <span class="text-xs text-slate-300">Lying / Dishonesty</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition-colors">
+                <input type="checkbox" value="angry" class="behavior-check accent-brand-500 rounded">
+                <span class="text-xs text-slate-300">Angry / Temper</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition-colors">
+                <input type="checkbox" value="disobedient" class="behavior-check accent-brand-500 rounded">
+                <span class="text-xs text-slate-300">Disobedient / Sassy</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Repeat offender & grief -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div>
+              <label class="block text-sm font-semibold text-slate-200 mb-2">
+                <i class="fa-solid fa-rotate-right text-brand-500 mr-2"></i>Repeat Offense?
+              </label>
+              <select id="repeatOffender" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-brand-500 transition-colors">
+                <option value="no">No, first time</option>
+                <option value="long">Yes, a while ago</option>
+                <option value="recent">Yes, recently (Extra severe)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-200 mb-2">
+                <i class="fa-solid fa-heart-crack text-brand-500 mr-2"></i>Did it affect/upset others?
+              </label>
+              <select id="othersSuffered" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-xs sm:text-sm text-slate-100 focus:outline-none focus:border-brand-500 transition-colors">
+                <option value="no">No / Barely</option>
+                <option value="yes">Yes, caused distress or inconvenience</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-slate-800">
+
+        <!-- Section 4: Attire & Restraints -->
+        <div>
+          <label class="block text-sm font-semibold text-slate-200 mb-2">
+            <i class="fa-solid fa-user-gear text-brand-500 mr-2"></i>Allowed Attire & Accessories (Random selection)
+          </label>
+          <p class="text-xs text-slate-400 mb-3">Check what is allowed. Clothing and Nude will automatically be kept mutually exclusive.</p>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+            <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition-colors">
+              <input type="checkbox" value="Clothing" class="attire-check accent-brand-500 rounded" checked>
+              <span class="text-xs text-slate-300">Clothing</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition-colors">
+              <input type="checkbox" value="Nude" class="attire-check accent-brand-500 rounded">
+              <span class="text-xs text-slate-300">Nude</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition-colors">
+              <input type="checkbox" value="Blindfold" class="attire-check accent-brand-500 rounded">
+              <span class="text-xs text-slate-300">Blindfold</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition-colors">
+              <input type="checkbox" value="Handcuffs" class="attire-check accent-brand-500 rounded">
+              <span class="text-xs text-slate-300">Handcuffs</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-slate-700 transition-colors">
+              <input type="checkbox" value="Nipple Clamps" class="attire-check accent-brand-500 rounded">
+              <span class="text-xs text-slate-300">Nipple Clamps</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" 
+          class="w-full py-4 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white font-bold rounded-xl shadow-lg shadow-brand-950/50 transition-all transform active:scale-[0.99] flex items-center justify-center gap-2 text-base">
+          <i class="fa-solid fa-key"></i>
+          <span>Generate Cornertime Code</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Output Section (Mystery Mode) -->
+    <div id="outputSection" class="hidden mt-8 space-y-6 animate-fade-in">
+      
+      <!-- Preparation & Equipment Checklist Display (ABOVE CODE BLOCK) -->
+      <div class="bg-amber-950/40 border border-amber-500/40 rounded-2xl p-6 shadow-xl backdrop-blur-md">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="p-2 bg-amber-500/20 text-amber-400 rounded-xl">
+            <i class="fa-solid fa-shirt text-xl"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-base sm:text-lg">⚡ Requirements &amp; Preparation</h3>
+            <p class="text-xs text-amber-200/80">Equip and prepare the items below before starting your session:</p>
+          </div>
+        </div>
+        
+        <div id="equipmentList" class="flex flex-wrap gap-2 pt-2">
+          <!-- Dynamic Equipment Badges Injected Here -->
+        </div>
+      </div>
+
+      <!-- Generated Code Container -->
+      <div class="bg-slate-900 border border-brand-500/30 rounded-2xl p-6 shadow-2xl">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span class="flex h-3 w-3 relative">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            </span>
+            <h3 class="font-bold text-white text-lg">Generated Cornertime Code</h3>
+          </div>
+          <span class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded-full border border-slate-700">Mystery Mode Active</span>
+        </div>
+
+        <p class="text-xs text-slate-400 mb-4">
+          Copy the code block below directly into the Cornertime app. All exact duration times and parameters remain encrypted.
+        </p>
+
+        <!-- Code Textarea -->
+        <div class="relative">
+          <textarea id="outputBlock" readonly rows="8"
+            class="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-emerald-400 focus:outline-none resize-none leading-relaxed select-all"></textarea>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-4 flex flex-col sm:flex-row gap-3">
+          <button onclick="copyToClipboard()" id="copyBtn"
+            class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-white font-semibold rounded-xl border border-slate-700 transition-colors flex items-center justify-center gap-2">
+            <i class="fa-regular fa-copy"></i>
+            <span id="copyBtnText">Copy Code</span>
+          </button>
+          
+          <!-- CORNERTIME GITHUB WEBSITE DIRECT LINK -->
+          <a href="https://cornertime.github.io/" target="_blank" rel="noopener noreferrer"
+            class="flex-1 py-3 bg-brand-600 hover:bg-brand-500 text-white font-semibold rounded-xl border border-brand-500 transition-colors flex items-center justify-center gap-2 text-center text-sm">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <span>Open Cornertime App</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="text-center py-6 text-xs text-slate-500 border-t border-slate-900 mt-12">
+    Cornertime Custom Punishment Generator &bull; Secure Client-Side Engine
+  </footer>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // --- STABIELE ALGEMENE TELLER LOGICA (CountAPI Revival + Fallback) ---
+    const COUNTER_KEY = 'cornertime_gen_count';
+    const COUNTER_ID = 'cornertime_generator_global_v1';
+    const BASE_API = 'https://countapi.mileshilliard.com/api/v1';
+
+    let localCount = parseInt(localStorage.getItem(COUNTER_KEY) || '52', 10);
+
+    function updateCounterDisplay(val) {
+      document.getElementById('counterDisplay').innerText = Number(val).toLocaleString();
+    }
+
+    // Laad direct de lokale stand zodat er NOOIT '--' staat
+    updateCounterDisplay(localCount);
+
+    async function initCounter() {
+      try {
+        const res = await fetch(`${BASE_API}/get/${COUNTER_ID}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data.value !== 'undefined') {
+            const numVal = parseInt(data.value, 10);
+            if (!isNaN(numVal)) {
+              localCount = Math.max(localCount, numVal);
+              localStorage.setItem(COUNTER_KEY, localCount);
+              updateCounterDisplay(localCount);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('API lookup failed, falling back to local counter:', e);
+      }
+    }
+
+    async function incrementCounter() {
+      // Direct lokaal verhogen voor snelle reactie
+      localCount += 1;
+      localStorage.setItem(COUNTER_KEY, localCount);
+      updateCounterDisplay(localCount);
+
+      try {
+        const res = await fetch(`${BASE_API}/hit/${COUNTER_ID}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data.value !== 'undefined') {
+            const numVal = parseInt(data.value, 10);
+            if (!isNaN(numVal)) {
+              localCount = Math.max(localCount, numVal);
+              localStorage.setItem(COUNTER_KEY, localCount);
+              updateCounterDisplay(localCount);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('API hit increment failed:', e);
+      }
+    }
+
+    // Laad bij geopende pagina de centrale stand
+    initCounter();
+
+    // --- HELPER FUNCTIONS ---
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getRandomFloat(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    // UTF-8 Base64 Encoder
+    function utf8ToBase64(str) {
+      return window.btoa(unescape(encodeURIComponent(str)));
+    }
+
+    // Wrap string every N characters
+    function wrapString(str, length) {
+      return str.match(new RegExp('.{1,' + length + '}', 'g')).join('\n');
+    }
+
+    // --- MAIN GENERATOR FUNCTION ---
+    function generateCode() {
+      const maxMinutes = parseFloat(document.getElementById('maxMinutes').value) || 15;
+      const hardMaxSeconds = Math.max(60, Math.round(maxMinutes * 60));
+
+      const sessionType = document.getElementById('sessionType').value;
+      const pose = document.querySelector('input[name="pose"]:checked').value;
+      const movementSeverity = document.querySelector('input[name="movementSeverity"]:checked').value;
+      const naughtinessScale = parseInt(document.getElementById('naughtinessScale').value, 10);
+      const encouragementPercent = parseInt(document.getElementById('encouragementSlider').value, 10);
+      const repeatOffender = document.getElementById('repeatOffender').value;
+      const othersSuffered = document.getElementById('othersSuffered').value;
+
+      // Behavior checkboxes
+      const checkedBehaviors = Array.from(document.querySelectorAll('.behavior-check:checked')).map(cb => cb.value);
+
+      // Attire checkboxes
+      const checkedAttire = Array.from(document.querySelectorAll('.attire-check:checked')).map(cb => cb.value);
+
+      // 1. BASE TIME CALCULATION
+      let baseSeconds = 180; // Default 3 min base
+
+      if (sessionType === 'test') baseSeconds = 120;
+      else if (sessionType === 'maintenance') baseSeconds = 360;
+      else if (sessionType === 'real') baseSeconds = 600;
+
+      // Naughtiness multiplier (Scale 1-5)
+      baseSeconds += (naughtinessScale - 1) * 90;
+
+      // Behavior weights
+      const behaviorWeights = {
+        messy: 30,
+        late: 60,
+        indecent: 90,
+        lying: 120,
+        angry: 120,
+        disobedient: 180
+      };
+      checkedBehaviors.forEach(b => {
+        if (behaviorWeights[b]) baseSeconds += behaviorWeights[b];
+      });
+
+      // Repeat offender multiplier
+      if (repeatOffender === 'long') baseSeconds *= 1.2;
+      else if (repeatOffender === 'recent') baseSeconds *= 1.5;
+
+      // Impact on others multiplier
+      if (othersSuffered === 'yes') baseSeconds *= 1.25;
+
+      // Dynamic Random Variance Factor (-20% to +25%)
+      const variance = getRandomFloat(0.80, 1.25);
+      let targetSeconds = Math.round(baseSeconds * variance);
+
+      // Clamp calculated seconds strictly to user max limit
+      targetSeconds = Math.min(targetSeconds, hardMaxSeconds);
+      targetSeconds = Math.max(60, targetSeconds); // Minimum 1 minute
+
+      // Fixed mystery duration (minimum and maximum set to the exact pre-calculated value, with 1s difference for schema compliance)
+      const minSeconds = targetSeconds;
+      const maxSeconds = targetSeconds + 1;
+
+      // Movement Penalty Range
+      let penMin = 10, penMax = 60;
+      if (movementSeverity === 'heavy') {
+        penMin = 60;
+        penMax = 180;
+      }
+
+      // Attire Randomization Rules (Clothing vs Nude mutex)
+      let finalAttire = [];
+      if (checkedAttire.length > 0) {
+        let pool = [...checkedAttire];
+        // If both Clothing and Nude are selected, pick one randomly
+        if (pool.includes('Clothing') && pool.includes('Nude')) {
+          const chooseNude = Math.random() < 0.5;
+          pool = pool.filter(item => item !== (chooseNude ? 'Clothing' : 'Nude'));
+        }
+        // Pick a random subset from remaining allowed pool
+        const subsetSize = getRandomInt(1, pool.length);
+        pool.sort(() => 0.5 - Math.random());
+        finalAttire = pool.slice(0, subsetSize);
+      }
+
+      // Render Required Equipment List ABOVE Code block
+      const equipmentContainer = document.getElementById('equipmentList');
+      equipmentContainer.innerHTML = '';
+      
+      // Always add Pose badge
+      const poseBadge = document.createElement('span');
+      poseBadge.className = 'px-3 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-300 rounded-lg text-xs font-semibold flex items-center gap-1.5';
+      poseBadge.innerHTML = `<i class="${pose === 'kneeling' ? 'fa-solid fa-person-kneeling' : 'fa-solid fa-person'} text-amber-400"></i> Pose: ${pose === 'kneeling' ? 'Kneeling' : 'Standing'}`;
+      equipmentContainer.appendChild(poseBadge);
+
+      if (finalAttire.length > 0) {
+        finalAttire.forEach(item => {
+          const badge = document.createElement('span');
+          badge.className = 'px-3 py-1 bg-slate-900 border border-amber-500/30 text-slate-200 rounded-lg text-xs font-medium flex items-center gap-1.5';
+          badge.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> ${item}`;
+          equipmentContainer.appendChild(badge);
+        });
+      } else {
+        const noBadge = document.createElement('span');
+        noBadge.className = 'px-3 py-1 bg-slate-900 border border-slate-800 text-slate-400 rounded-lg text-xs font-medium';
+        noBadge.innerText = 'No extra accessories required.';
+        equipmentContainer.appendChild(noBadge);
+      }
+
+      // English Spoken Voice Phrases Array
+      const phrases = {
+        getReady: [
+          "Get ready: You have been naughty. Get in the corner, facing the wall."
+        ],
+        start: [
+          "You better not move. I'm starting your punishment now."
+        ],
+        scold: [
+          "Do I see you moving?"
+        ],
+        penalize: [
+          "I warned you not to move. I'm adding some more minutes in the clock."
+        ],
+        encourage: [
+          "You're doing fine. Keep it up and this will be over in no time."
+        ],
+        end: [
+          "You can come out of the corner now."
+        ]
+      };
+
+      // Construct JSON Schema strictly adhering to Cornertime format
+      const cornertimePayload = {
+        durationRange: {
+          minimum: minSeconds,
+          maximum: maxSeconds
+        },
+        penaltyRange: {
+          minimum: penMin,
+          maximum: penMax
+        },
+        penaltyProbabilities: [0, 1],
+        encouragementProbability: parseFloat((encouragementPercent / 100).toFixed(2)),
+        phrases: phrases
+      };
+
+      // Encode to Base64 & Format
+      const jsonStr = JSON.stringify(cornertimePayload, null, 2);
+      const base64Data = utf8ToBase64(jsonStr);
+      const wrappedBase64 = wrapString(base64Data, 76);
+
+      const finalBlock = `-----BEGIN CORNERTIME CUSTOM PUNISHMENT-----\n${wrappedBase64}\n-----END CORNERTIME CUSTOM PUNISHMENT-----`;
+
+      // Display Output
+      document.getElementById('outputBlock').value = finalBlock;
+      document.getElementById('outputSection').classList.remove('hidden');
+
+      // Scroll to output smoothly
+      document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+
+      // Increment Global Counter on Cloud Server
+      incrementCounter();
+    }
+
+    // --- COPY TO CLIPBOARD ---
+    function copyToClipboard() {
+      const copyText = document.getElementById("outputBlock");
+      copyText.select();
+      copyText.setSelectionRange(0, 99999);
+
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(copyText.value);
+        }
+      }
+
+      const btnText = document.getElementById('copyBtnText');
+      btnText.innerText = 'Copied!';
+      setTimeout(() => {
+        btnText.innerText = 'Copy Code';
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
