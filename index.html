@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cornertime Generator - Introduction</title>
+    <style>
+        :root {
+            --bg-color: #12151e;
+            --card-bg: #1a1e2b;
+            --border-color: #2e354a;
+            --primary-gold: #d4af37;
+            --primary-hover: #f3cf55;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --danger-red: #ef4444;
+            --accent-bg: #222736;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 70%),
+                radial-gradient(circle at 50% 100%, rgba(0, 0, 0, 0.5) 0%, transparent 70%);
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--primary-gold), transparent);
+        }
+
+        /* Content Layout */
+        .headmaster-section {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+
+        .headmaster-avatar {
+            flex-shrink: 0;
+            width: 150px;
+            height: 150px;
+            background-color: var(--accent-bg);
+            border: 2px solid var(--primary-gold);
+            border-radius: 50%;
+            padding: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .headmaster-text {
+            flex: 1;
+        }
+
+        .headmaster-text h1 {
+            color: var(--primary-gold);
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            font-family: 'Georgia', serif;
+            letter-spacing: 0.5px;
+        }
+
+        .headmaster-text p {
+            line-height: 1.6;
+            color: #cbd5e1;
+            font-size: 1.05rem;
+        }
+
+        /* Info / Explanation Box */
+        .info-box {
+            background-color: var(--accent-bg);
+            border-left: 4px solid var(--primary-gold);
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+        }
+
+        .info-box strong {
+            color: var(--text-main);
+        }
+
+        /* Action Button */
+        .action-area {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .btn-continue {
+            display: inline-block;
+            background: linear-gradient(135deg, #d4af37 0%, #aa820a 100%);
+            color: #12151e;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 16px 36px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-continue:hover {
+            background: linear-gradient(135deg, #f3cf55 0%, #c49813 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Disclaimer */
+        .disclaimer {
+            border-top: 1px solid var(--border-color);
+            padding-top: 20px;
+            font-size: 0.8rem;
+            color: #64748b;
+            line-height: 1.5;
+            text-align: justify;
+        }
+
+        /* Modal / Age Gate */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(10, 12, 18, 0.95);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--primary-gold);
+            border-radius: 12px;
+            max-width: 480px;
+            width: 100%;
+            padding: 35px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .modal-card h2 {
+            color: var(--primary-gold);
+            font-size: 1.6rem;
+            margin-bottom: 15px;
+            font-family: 'Georgia', serif;
+        }
+
+        .modal-card p {
+            color: var(--text-main);
+            margin-bottom: 25px;
+            font-size: 1.05rem;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-modal {
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-yes {
+            background-color: var(--primary-gold);
+            color: #12151e;
+        }
+
+        .btn-yes:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-no {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-no:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .denied-message {
+            display: none;
+            color: var(--danger-red);
+            margin-top: 15px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 650px) {
+            .headmaster-section {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .container {
+                padding: 25px;
+            }
+            .modal-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Age Gate Modal -->
+    <div class="modal-overlay" id="ageModal">
+        <div class="modal-card">
+            <h2>Age Verification</h2>
+            <p>Welcome. Please confirm your age before accessing this website.</p>
+            <p><strong>Are you 18 years of age or older?</strong></p>
+            <div class="modal-buttons">
+                <button class="btn-modal btn-yes" onclick="verifyAge(true)">Yes, I am 18 or older</button>
+                <button class="btn-modal btn-no" onclick="verifyAge(false)">I am under 18</button>
+            </div>
+            <div class="denied-message" id="deniedMsg">
+                This website is not suitable for you. Please leave and return when you are 18 years of age or older.
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        
+        <div class="headmaster-section">
+            <div class="headmaster-avatar">
+                <!-- SVG Illustration of Strict Headmaster -->
+                <svg width="120" height="120" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="48" fill="#12151E"/>
+                    <!-- Suit Jacket -->
+                    <path d="M20 90 Q50 75 80 90 L85 100 L15 100 Z" fill="#2D3748"/>
+                    <path d="M38 78 L50 100 L62 78 L50 82 Z" fill="#E2E8F0"/>
+                    <path d="M48 82 L52 82 L51 98 L49 98 Z" fill="#718096"/>
+                    <!-- Head -->
+                    <ellipse cx="50" cy="45" rx="22" ry="26" fill="#E2E8F0"/>
+                    <!-- Hair -->
+                    <path d="M28 38 C28 22 40 18 50 18 C60 18 72 22 72 38 C68 28 58 25 50 25 C42 25 32 28 28 38 Z" fill="#4A5568"/>
+                    <!-- Glasses -->
+                    <rect x="33" y="38" width="12" height="8" rx="2" stroke="#D4AF37" stroke-width="2" fill="rgba(255,255,255,0.2)"/>
+                    <rect x="55" y="38" width="12" height="8" rx="2" stroke="#D4AF37" stroke-width="2" fill="rgba(255,255,255,0.2)"/>
+                    <line x1="45" y1="42" x2="55" y2="42" stroke="#D4AF37" stroke-width="2"/>
+                    <line x1="28" y1="41" x2="33" y2="41" stroke="#D4AF37" stroke-width="1.5"/>
+                    <line x1="67" y1="41" x2="72" y2="41" stroke="#D4AF37" stroke-width="1.5"/>
+                    <!-- Eyes (Stern Look) -->
+                    <line x1="36" y1="41" x2="42" y2="41" stroke="#2D3748" stroke-width="1.5"/>
+                    <line x1="58" y1="41" x2="64" y2="41" stroke="#2D3748" stroke-width="1.5"/>
+                    <!-- Eyebrows (Strict/Frowning) -->
+                    <path d="M32 34 L45 37" stroke="#2D3748" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M68 34 L55 37" stroke="#2D3748" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Nose -->
+                    <path d="M50 42 L48 50 L52 50" stroke="#CBD5E1" stroke-width="1.5" fill="none"/>
+                    <!-- Mouth (Strict Line) -->
+                    <path d="M42 58 Q50 56 58 58" stroke="#2D3748" stroke-width="2" fill="none" stroke-linecap="round"/>
+                </svg>
+            </div>
+            
+            <div class="headmaster-text">
+                <h1>Are you here again?</h1>
+                <p>
+                    It is time for you to behave properly and simply do what you are supposed to do. That means being on time, not being cheeky, keeping your room tidy, not telling lies, and especially leaving the opposite sex alone.
+                </p>
+                <p style="margin-top: 10px;">
+                    I want you to become a valued member of society later on, and that process needs to start now. That is why I punish students when they fail to behave properly here. Since you haven't mastered this yet, I think it's best if you go stand in the corner. Perhaps you'll learn from it. And if you don't learn this time, you will just have to stand in the corner more often and for longer.
+                </p>
+            </div>
+        </div>
+
+        <div class="info-box">
+            On the next page, you will set a number of parameters. The maximum time configured will never be exceeded by the settings below it. Please note: in the case of penalties caused by movement, this time may be exceeded. When you press the <strong>"Generate Cornertime Code"</strong> button, you will receive a list of accessories you must use, followed by a code block and two buttons: <strong>"Copy code"</strong> and <strong>"Open Cornertime App"</strong>. First, copy the code, and then press "Open Cornertime App". This will open another website where you can paste the code block under the option <em>"Carry out a custom Punishment"</em>, after which the punishment will begin.
+        </div>
+
+        <div class="action-area">
+            <a href="generator.html" class="btn-continue">Go to Generator</a>
+        </div>
+
+        <div class="disclaimer">
+            Disclaimer: This webpage was created for entertainment purposes only. Naturally, you engage in this entirely voluntarily and without disturbing others. Please pay attention to your own safety. Ensure that you cannot be caught by others, and if you use handcuffs, keep the keys within reach so you can free yourself. The creator of this website can in no case be held responsible for the actions of the users of this website.
+        </div>
+
+    </div>
+
+    <script>
+        function verifyAge(isAdult) {
+            if (isAdult) {
+                document.getElementById('ageModal').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('ageModal').style.display = 'none';
+                }, 300);
+            } else {
+                document.getElementById('deniedMsg').style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
