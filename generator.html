@@ -63,7 +63,7 @@
         <i class="fa-solid fa-hourglass-half text-3xl"></i>
       </div>
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">
-        Cornertime Punishment Generator
+        Cornertime Custom Punishment Generator
       </h1>
       <p class="text-slate-400 max-w-lg mx-auto text-sm sm:text-base">
         Set the criteria for an appropriate punishment session. The result is securely encrypted into a unique Cornertime code.
@@ -537,9 +537,9 @@
         equipmentContainer.appendChild(noBadge);
       }
 
-      // Genereer de switch tag en voeg toe aan de presetTitle
+      // Automatisch de tag achter "Custom Punishment" plaatsen in het name-veld
       const switchTag = buildSwitchTag(pose === 'kneeling', movementSeverity === 'heavy', finalAttire);
-      const fullPresetTitle = `Custom Punishment ${switchTag}`;
+      const sessionName = `Custom Punishment ${switchTag}`;
 
       // English Spoken Voice Phrases Array
       const phrases = {
@@ -564,7 +564,7 @@
       };
 
       const cornertimePayload = {
-        presetTitle: fullPresetTitle,
+        name: sessionName,
         durationRange: {
           minimum: minSeconds,
           maximum: maxSeconds
