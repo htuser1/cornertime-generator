@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="nl" class="h-full bg-slate-900 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cornertime Custom Punishment Generator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        pre, code { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-500 flex items-center justify-center shadow-lg shadow-sky-500/20">
+                    <i class="fa-solid fa-stopwatch text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-slate-100">Cornertime Generator</h1>
+                    <p class="text-xs text-slate-400">Custom Punishment Encoder & Decoder</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button id="btn-load-example" class="px-3 py-1.5 text-xs sm:text-sm font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i> Voorbeeld Laden
+                </button>
+                <button id="btn-reset" class="px-3 py-1.5 text-xs sm:text-sm font-medium bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg transition border border-transparent hover:border-slate-700">
+                    <i class="fa-solid fa-rotate-left"></i> Reset
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Column: Form & Inputs (7 cols) -->
+        <div class="lg:col-span-7 space-y-6">
+            
+            <!-- Navigation Tabs -->
+            <div class="flex border-b border-slate-800">
+                <button id="tab-generator-btn" class="px-4 py-3 font-semibold text-sm border-b-2 border-sky-500 text-sky-400 flex items-center gap-2 transition">
+                    <i class="fa-solid fa-pen-to-square"></i> Generator Formulier
+                </button>
+                <button id="tab-decoder-btn" class="px-4 py-3 font-semibold text-sm border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 transition">
+                    <i class="fa-solid fa-code"></i> Bestaande Code Importeren
+                </button>
+            </div>
+
+            <!-- TAB 1: Generator Form -->
+            <div id="tab-generator" class="space-y-6">
+                
+                <!-- Basic Info Card -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-sky-400 flex items-center gap-2">
+                        <i class="fa-solid fa-heading"></i> Algemene Instellingen
+                    </h2>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Titel van de Custom Punishment</label>
+                        <input type="text" id="input-title" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-slate-100 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition" placeholder="bijv. Custom Punishment">
+                        <p class="text-xs text-slate-500 mt-1">Dit is de enige veldnaam die zichtbaar is voor de ontvanger vooraf.</p>
+                    </div>
+                </div>
+
+                <!-- Timing & Duration Card -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-sky-400 flex items-center gap-2">
+                        <i class="fa-regular fa-clock"></i> Tijdsduur (Seconden)
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Minimale duur (sec)</label>
+                            <input type="number" id="input-min-duration" min="0" step="1" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-slate-100 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition">
+                            <p class="text-xs text-slate-500 mt-1" id="min-duration-formatted">5m 0s</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Maximale duur (sec)</label>
+                            <input type="number" id="input-max-duration" min="0" step="1" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-slate-100 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition">
+                            <p class="text-xs text-slate-500 mt-1" id="max-duration-formatted">10m 0s</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Penalties & Movement Card -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-sky-400 flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Beweging & Strafinstellingen
+                    </h2>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-1">Strafkansen (Penalty Probabilities)</label>
+                        <input type="text" id="input-penalty-probs" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-slate-100 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition" placeholder="0 0 1">
+                        <p class="text-xs text-slate-500 mt-1">Kans op straf per bewegingsovertreding, gescheiden door spaties (bijv. "0 0.5 1").</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Minimale extra straftijd (sec)</label>
+                            <input type="number" id="input-min-penalty" min="0" step="1" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-slate-100 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Maximale extra straftijd (sec)</label>
+                            <input type="number" id="input-max-penalty" min="0" step="1" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2 text-slate-100 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition">
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-sm font-medium text-slate-300">Aanmoedigingskans (per minuut)</label>
+                            <span id="encourage-val-display" class="text-xs font-mono bg-slate-800 text-sky-400 px-2 py-0.5 rounded">0.70 (70%)</span>
+                        </div>
+                        <input type="range" id="input-encourage-prob" min="0" max="1" step="0.05" class="w-full h-2 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-sky-500">
+                    </div>
+                </div>
+
+                <!-- Phrases Card -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-sky-400 flex items-center gap-2">
+                        <i class="fa-solid fa-[#]"></i> Gesproken Zinnen (Phrases)
+                    </h2>
+                    <p class="text-xs text-slate-400">Voer elke unieke zin in op een nieuwe regel. Er wordt willekeurig één zin gekozen per gebeurtenis.</p>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Klaarmaken (Get Ready)</label>
+                            <textarea id="phrase-getready" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500 transition" placeholder="Eén zin per regel..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Start van de straf (Start)</label>
+                            <textarea id="phrase-start" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500 transition" placeholder="Eén zin per regel..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Waarschuwing bij beweging (Scold - zonder tijdstraf)</label>
+                            <textarea id="phrase-scold" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500 transition" placeholder="Eén zin per regel..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Straf bij beweging (Penalize - met extra tijd)</label>
+                            <textarea id="phrase-penalize" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500 transition" placeholder="Eén zin per regel..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Aanmoediging (Encourage)</label>
+                            <textarea id="phrase-encourage" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500 transition" placeholder="Eén zin per regel..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Einde van de straf (End)</label>
+                            <textarea id="phrase-end" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-sky-500 transition" placeholder="Eén zin per regel..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TAB 2: Decoder / Import Form -->
+            <div id="tab-decoder" class="hidden space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+                        <i class="fa-solid fa-file-import"></i> Bestaande Cornertime Code Plakken
+                    </h2>
+                    <p class="text-xs text-slate-400">Plak hier een gegenereerd blok om de instellingen uit te lezen en in te laden in de editor.</p>
+                    
+                    <textarea id="decode-input" rows="8" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-xs font-mono text-slate-100 focus:outline-none focus:border-indigo-500 transition" placeholder="-----BEGIN CORNERTIME CUSTOM PUNISHMENT-----&#10;...&#10;-----END CORNERTIME CUSTOM PUNISHMENT-----"></textarea>
+                    
+                    <div id="decode-error" class="hidden p-3 bg-red-950/50 border border-red-800 text-red-300 rounded-lg text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-red-400"></i>
+                        <span id="decode-error-text">Ongeldige code-indeling.</span>
+                    </div>
+
+                    <button id="btn-decode-and-load" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20">
+                        <i class="fa-solid fa-arrow-down-left-and-arrow-up-right-to-center"></i> Decoderen en inladen in formulier
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Live Output & Code Block (5 cols) -->
+        <div class="lg:col-span-5 space-y-6 sticky top-24 h-fit">
+            
+            <!-- Output Code Card -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-xl space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                        <i class="fa-solid fa-square-poll-vertical"></i> Gegeneerde Code
+                    </h2>
+                    <span class="text-[10px] uppercase tracking-widest bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded font-mono">Gereed</span>
+                </div>
+
+                <div class="relative group">
+                    <pre id="output-code" class="w-full h-80 overflow-y-auto bg-slate-950 border border-slate-800 rounded-lg p-4 text-xs font-mono text-slate-300 leading-relaxed select-all scrollbar-thin scrollbar-thumb-slate-800"></pre>
+                    
+                    <!-- Floating Copy Button -->
+                    <button id="btn-copy" class="absolute top-3 right-3 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition shadow-md flex items-center gap-1.5">
+                        <i class="fa-regular fa-copy"></i> <span>Kopiëren</span>
+                    </button>
+                </div>
+
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Kopieer het volledige blok hierboven en plak dit in de Cornertime app via de link <span class="text-sky-300 font-medium">"I Have a Custom Punishment"</span>.
+                </p>
+            </div>
+
+            <!-- Live JSON Preview Accordion -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-sm space-y-2">
+                <details class="group">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none text-xs text-slate-400 hover:text-slate-200">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-code text-sky-400"></i> Bekijk ongecodeerde JSON structuur</span>
+                        <span class="transition group-open:rotate-180"><i class="fa-solid fa-chevron-down"></i></span>
+                    </summary>
+                    <div class="mt-3 pt-3 border-t border-slate-800">
+                        <pre id="output-json" class="max-h-60 overflow-y-auto bg-slate-950 border border-slate-800 rounded-lg p-3 text-[11px] font-mono text-amber-300/80 leading-snug"></pre>
+                    </div>
+                </details>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-emerald-600 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 transition-all transform translate-y-20 opacity-0 pointer-events-none z-50">
+        <i class="fa-solid fa-circle-check text-lg"></i>
+        <span id="toast-message" class="text-sm font-medium">Gekopieerd naar klembord!</span>
+    </div>
+
+    <!-- JavaScript Encoding & Logic -->
+    <script>
+        // --- Core Encoding & Decoding Functions ---
+        
+        const LINE_LENGTH = 76;
+        const KIND = 'CUSTOM PUNISHMENT';
+
+        function makeHeader() {
+            return `-----BEGIN CORNERTIME ${KIND}-----`;
+        }
+
+        function makeFooter() {
+            return `-----END CORNERTIME ${KIND}-----`;
+        }
+
+        function encodeBase64(str) {
+            return btoa(encodeURIComponent(str).replace(
+                /%([0-9A-F]{2})/g,
+                (match, p1) => String.fromCharCode(parseInt('0x' + p1, 16))
+            ));
+        }
+
+        function decodeBase64(str) {
+            return decodeURIComponent(
+                atob(str).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+            );
+        }
+
+        function wrapLines(longStr, lineLength = LINE_LENGTH) {
+            const lines = [];
+            let start = 0;
+            let line = '';
+            while ((line = longStr.slice(start, start + lineLength))) {
+                lines.push(line);
+                start += lineLength;
+            }
+            return lines.join('\n');
+        }
+
+        function serializePreset(presetObj) {
+            const header = makeHeader();
+            const footer = makeFooter();
+            const jsonStr = JSON.stringify(presetObj);
+            const wrappedBase64 = wrapLines(encodeBase64(jsonStr));
+            return `${header}\n${wrappedBase64}\n${footer}`;
+        }
+
+        function deserializePreset(rawString) {
+            let data = rawString.trim();
+            const header = makeHeader();
+            const footer = makeFooter();
+
+            if (!data.startsWith(header)) {
+                throw new Error('Codeblok begint niet met de vereiste header.');
+            }
+            if (!data.endsWith(footer)) {
+                throw new Error('Codeblok eindigt niet met de vereiste footer.');
+            }
+
+            // Remove header and footer
+            data = data.slice(header.length, data.length - footer.length).trim();
+            // Remove any linebreaks in base64 payload
+            data = data.replace(/\r?\n|\r/g, '');
+            
+            const jsonText = decodeBase64(data);
+            return JSON.parse(jsonText);
+        }
+
+        // --- DOM Elements ---
+        const inputTitle = document.getElementById('input-title');
+        const inputMinDuration = document.getElementById('input-min-duration');
+        const inputMaxDuration = document.getElementById('input-max-duration');
+        const minDurationFormatted = document.getElementById('min-duration-formatted');
+        const maxDurationFormatted = document.getElementById('max-duration-formatted');
+        const inputPenaltyProbs = document.getElementById('input-penalty-probs');
+        const inputMinPenalty = document.getElementById('input-min-penalty');
+        const inputMaxPenalty = document.getElementById('input-max-penalty');
+        const inputEncourageProb = document.getElementById('input-encourage-prob');
+        const encourageValDisplay = document.getElementById('encourage-val-display');
+
+        const phraseGetReady = document.getElementById('phrase-getready');
+        const phraseStart = document.getElementById('phrase-start');
+        const phraseScold = document.getElementById('phrase-scold');
+        const phrasePenalize = document.getElementById('phrase-penalize');
+        const phraseEncourage = document.getElementById('phrase-encourage');
+        const phraseEnd = document.getElementById('phrase-end');
+
+        const outputCode = document.getElementById('output-code');
+        const outputJson = document.getElementById('output-json');
+        const btnCopy = document.getElementById('btn-copy');
+        const btnLoadExample = document.getElementById('btn-load-example');
+        const btnReset = document.getElementById('btn-reset');
+
+        const tabGeneratorBtn = document.getElementById('tab-generator-btn');
+        const tabDecoderBtn = document.getElementById('tab-decoder-btn');
+        const tabGenerator = document.getElementById('tab-generator');
+        const tabDecoder = document.getElementById('tab-decoder');
+
+        const decodeInput = document.getElementById('decode-input');
+        const decodeError = document.getElementById('decode-error');
+        const decodeErrorText = document.getElementById('decode-error-text');
+        const btnDecodeAndLoad = document.getElementById('btn-decode-and-load');
+
+        // --- Helper Functions ---
+        function parsePhrases(text) {
+            return text.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+        }
+
+        function formatPhrasesForTextarea(arr) {
+            return Array.isArray(arr) ? arr.join('\n') : '';
+        }
+
+        function parsePenaltyProbabilities(str) {
+            return str.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
+        }
+
+        function secondsToFormatted(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${m}m ${s}s`;
+        }
+
+        // Default Presets
+        const examplePreset = {
+            title: "Test",
+            durationRange: { minimum: 300, maximum: 600 },
+            penaltyProbabilities: [0, 0, 1],
+            penaltyRange: { minimum: 20, maximum: 60 },
+            encouragementProbability: 0.7,
+            phrases: {
+                getReady: ["You have been naughty. Get in the corner, facing the wall."],
+                start: ["You better not move. I'm starting your punishment now."],
+                scold: ["Do I see you moving?"],
+                penalize: ["I warned you not to move. I'm adding some more minutes on the clock."],
+                encourage: ["You're doing fine. Keep it up and this will be over in no time."],
+                end: ["You can come out of the corner now."]
+            }
+        };
+
+        const defaultPreset = {
+            title: "Custom Punishment",
+            durationRange: { minimum: 300, maximum: 600 },
+            penaltyProbabilities: [0.2, 0.5, 1],
+            penaltyRange: { minimum: 15, maximum: 45 },
+            encouragementProbability: 0.5,
+            phrases: {
+                getReady: ["Ga in de hoek staan."],
+                start: ["Je straf gaat nu in."],
+                scold: ["Niet bewegen!"],
+                penalize: ["Er komt extra tijd bij!"],
+                encourage: ["Hou nog even vol."],
+                end: ["Je bent klaar, je mag de hoek uit."]
+            }
+        };
+
+        function populateForm(preset) {
+            inputTitle.value = preset.title || '';
+            inputMinDuration.value = preset.durationRange?.minimum ?? 300;
+            inputMaxDuration.value = preset.durationRange?.maximum ?? 600;
+            
+            inputPenaltyProbs.value = (preset.penaltyProbabilities || []).join(' ');
+            inputMinPenalty.value = preset.penaltyRange?.minimum ?? 20;
+            inputMaxPenalty.value = preset.penaltyRange?.maximum ?? 60;
+            
+            inputEncourageProb.value = preset.encouragementProbability ?? 0.5;
+            
+            phraseGetReady.value = formatPhrasesForTextarea(preset.phrases?.getReady);
+            phraseStart.value = formatPhrasesForTextarea(preset.phrases?.start);
+            phraseScold.value = formatPhrasesForTextarea(preset.phrases?.scold);
+            phrasePenalize.value = formatPhrasesForTextarea(preset.phrases?.penalize);
+            phraseEncourage.value = formatPhrasesForTextarea(preset.phrases?.encourage);
+            phraseEnd.value = formatPhrasesForTextarea(preset.phrases?.end);
+
+            updateGenerations();
+        }
+
+        function extractFormPreset() {
+            return {
+                title: inputTitle.value.trim() || 'Custom Punishment',
+                durationRange: {
+                    minimum: parseInt(inputMinDuration.value) || 0,
+                    maximum: parseInt(inputMaxDuration.value) || 0
+                },
+                penaltyProbabilities: parsePenaltyProbabilities(inputPenaltyProbs.value),
+                penaltyRange: {
+                    minimum: parseInt(inputMinPenalty.value) || 0,
+                    maximum: parseInt(inputMaxPenalty.value) || 0
+                },
+                encouragementProbability: parseFloat(inputEncourageProb.value) || 0,
+                phrases: {
+                    getReady: parsePhrases(phraseGetReady.value),
+                    start: parsePhrases(phraseStart.value),
+                    scold: parsePhrases(phraseScold.value),
+                    penalize: parsePhrases(phrasePenalize.value),
+                    encourage: parsePhrases(phraseEncourage.value),
+                    end: parsePhrases(phraseEnd.value)
+                }
+            };
+        }
+
+        function updateGenerations() {
+            const currentPreset = extractFormPreset();
+
+            // Update duration formatting labels
+            minDurationFormatted.textContent = secondsToFormatted(currentPreset.durationRange.minimum);
+            maxDurationFormatted.textContent = secondsToFormatted(currentPreset.durationRange.maximum);
+
+            // Update probability percentage label
+            const probPct = Math.round(currentPreset.encouragementProbability * 100);
+            encourageValDisplay.textContent = `${currentPreset.encouragementProbability.toFixed(2)} (${probPct}%)`;
+
+            // Update JSON & Base64 Output
+            outputJson.textContent = JSON.stringify(currentPreset, null, 2);
+            outputCode.textContent = serializePreset(currentPreset);
+        }
+
+        // --- Event Listeners ---
+
+        // Input listeners for live updates
+        const allInputs = [
+            inputTitle, inputMinDuration, inputMaxDuration,
+            inputPenaltyProbs, inputMinPenalty, inputMaxPenalty, inputEncourageProb,
+            phraseGetReady, phraseStart, phraseScold, phrasePenalize, phraseEncourage, phraseEnd
+        ];
+
+        allInputs.forEach(el => el.addEventListener('input', updateGenerations));
+
+        // Preset actions
+        btnLoadExample.addEventListener('click', () => {
+            populateForm(examplePreset);
+            showToast('Voorbeeld succesvol geladen!');
+        });
+
+        btnReset.addEventListener('click', () => {
+            populateForm(defaultPreset);
+            showToast('Formulier teruggezet.');
+        });
+
+        // Copy button
+        btnCopy.addEventListener('click', () => {
+            const textToCopy = outputCode.textContent;
+            
+            // Execute fallback copy for iframe compatibility
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            showToast('Codeblok gekopieerd naar klembord!');
+        });
+
+        // Toast notifications
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.textContent = msg;
+
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+
+        // Tab Switching
+        tabGeneratorBtn.addEventListener('click', () => {
+            tabGenerator.classList.remove('hidden');
+            tabDecoder.classList.add('hidden');
+
+            tabGeneratorBtn.classList.add('border-sky-500', 'text-sky-400');
+            tabGeneratorBtn.classList.remove('border-transparent', 'text-slate-400');
+
+            tabDecoderBtn.classList.remove('border-indigo-500', 'text-indigo-400');
+            tabDecoderBtn.classList.add('border-transparent', 'text-slate-400');
+        });
+
+        tabDecoderBtn.addEventListener('click', () => {
+            tabDecoder.classList.remove('hidden');
+            tabGenerator.classList.add('hidden');
+
+            tabDecoderBtn.classList.add('border-indigo-500', 'text-indigo-400');
+            tabDecoderBtn.classList.remove('border-transparent', 'text-slate-400');
+
+            tabGeneratorBtn.classList.remove('border-sky-500', 'text-sky-400');
+            tabGeneratorBtn.classList.add('border-transparent', 'text-slate-400');
+        });
+
+        // Decoder import action
+        btnDecodeAndLoad.addEventListener('click', () => {
+            decodeError.classList.add('hidden');
+            const rawVal = decodeInput.value.trim();
+
+            if (!rawVal) {
+                decodeErrorText.textContent = 'Plak eerst een geldige Cornertime code.';
+                decodeError.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const parsedPreset = deserializePreset(rawVal);
+                populateForm(parsedPreset);
+                
+                // Switch back to generator tab
+                tabGeneratorBtn.click();
+                showToast('Preset succesvol geïmporteerd en geladen!');
+            } catch (err) {
+                decodeErrorText.textContent = `Fout bij decoderen: ${err.message}`;
+                decodeError.classList.remove('hidden');
+            }
+        });
+
+        // Initial launch
+        window.onload = () => {
+            populateForm(examplePreset);
+        };
+    </script>
+</body>
+</html>
