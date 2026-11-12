@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="nl" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cornertime Rapport Analyzer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Navigatiebalk -->
+    <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-bold tracking-tight text-white">Cornertime <span class="text-indigo-400">Analyzer</span></h1>
+                    <p id="header-subtitle" class="text-xs text-slate-400 hidden sm:block">Sessie-analyse &amp; Logboek Visualizer</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Taal Switcher (NL / EN) -->
+                <div class="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800" role="group" aria-label="Language switch">
+                    <button id="lang-nl" type="button" class="px-2 py-1 text-xs font-semibold rounded-md bg-indigo-600 text-white transition">NL</button>
+                    <button id="lang-en" type="button" class="px-2 py-1 text-xs font-semibold rounded-md text-slate-400 hover:text-white transition">EN</button>
+                </div>
+
+                <button id="btn-load-sample" type="button" class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                    </svg>
+                    <span id="btn-sample-label" class="hidden md:inline">Laad Voorbeeldrapport</span>
+                    <span id="btn-sample-short" class="md:hidden">Voorbeeld</span>
+                </button>
+                <button id="btn-toggle-input" type="button" class="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition flex items-center gap-1.5 shadow-sm shadow-indigo-500/20">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span id="toggle-input-label">Invoer Verbergen</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+
+        <!-- Invoer Paneel (Inklapbaar) -->
+        <section id="input-panel" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl transition-all">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                <div>
+                    <h2 class="text-sm font-semibold text-white flex items-center gap-2">
+                        <span id="input-title">Rapport Invoeren</span>
+                        <span id="input-badge" class="text-xs font-normal px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Base64 of JSON</span>
+                    </h2>
+                    <p id="input-desc" class="text-xs text-slate-400 mt-0.5">Plak het volledige <code class="text-indigo-400 font-mono">BEGIN CORNERTIME PUNISHMENT REPORT</code> blok hieronder. De analyse start automatisch.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="btn-clear" type="button" class="text-xs text-slate-400 hover:text-slate-200 px-2.5 py-1.5 rounded-lg hover:bg-slate-800 transition">Wissen</button>
+                    <button id="btn-analyze" type="button" class="text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-1.5 rounded-lg transition">Analyseer Rapport</button>
+                </div>
+            </div>
+
+            <textarea id="report-input" rows="4" spellcheck="false" placeholder="-----BEGIN CORNERTIME PUNISHMENT REPORT-----&#10;eyJuYW1lIjoiQW5vbnltb3VzIi...&#10;-----END CORNERTIME PUNISHMENT REPORT-----" class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl p-3 font-mono text-xs text-slate-300 placeholder-slate-600 transition resize-y"></textarea>
+
+            <!-- Foutmelding Banner -->
+            <div id="error-box" class="hidden mt-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5">
+                <svg class="w-4 h-4 text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span id="error-message">Ongeldig rapportformaat.</span>
+            </div>
+        </section>
+
+        <!-- Dashboard Container -->
+        <div id="dashboard-content" class="space-y-6">
+
+            <!-- Sessie Header Card -->
+            <section class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg">
+                <div class="space-y-1">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30" id="meta-preset">Custom Punishment</span>
+                        <span class="text-xs text-slate-400 flex items-center gap-1" id="meta-date">
+                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>12 nov 2026, 16:23</span>
+                        </span>
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2.5 pt-1">
+                        <span id="meta-participant-label">Deelnemer:</span>
+                        <span id="meta-name" class="text-indigo-400">Anonymous</span>
+                    </h2>
+                </div>
+
+                <!-- Gedragsscore / Discipline Badge -->
+                <div class="flex items-center gap-4 bg-slate-950/70 border border-slate-800/80 rounded-xl px-4 py-3">
+                    <div>
+                        <p id="discipline-title" class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Discipline Score</p>
+                        <div class="flex items-baseline gap-2">
+                            <span id="discipline-score" class="text-2xl font-bold text-emerald-400">88%</span>
+                            <span id="discipline-label" class="text-xs text-slate-400">Netjes</span>
+                        </div>
+                        <p id="discipline-formula-hint" class="text-[10px] text-slate-500 mt-0.5">-4% per waarschuwing, -8% per straf</p>
+                    </div>
+                    <div class="w-11 h-11 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400" id="discipline-icon-wrap">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+
+            <!-- KPI Cards Grid -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- KPI 1: Totale Duur -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <span id="kpi-title-duration" class="text-xs font-medium text-slate-400">Totale Duur</span>
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-2xl sm:text-3xl font-bold font-mono text-white" id="kpi-total-duration">08:54</div>
+                        <p class="text-xs text-slate-400 mt-1 flex items-center gap-1.5" id="kpi-duration-diff">
+                            <span>Gepland: 08:47</span>
+                            <span class="px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-400 font-mono text-[11px]">+7s</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- KPI 2: Overtredingen -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <span id="kpi-title-violations" class="text-xs font-medium text-slate-400">Overtredingen</span>
+                        <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-2xl sm:text-3xl font-bold font-mono text-white" id="kpi-violations">2</div>
+                        <p class="text-xs text-slate-400 mt-1" id="kpi-violations-breakdown">
+                            <span class="text-amber-400">1 waarschuwing</span> &bull; <span class="text-rose-400">1 straf</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- KPI 3: Aanmoedigingen -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <span id="kpi-title-encouragements" class="text-xs font-medium text-slate-400">Aanmoedigingen</span>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-2xl sm:text-3xl font-bold font-mono text-white" id="kpi-encouragements">6</div>
+                        <p class="text-xs text-slate-400 mt-1" id="kpi-encourage-avg">Gemiddeld elke 01:29</p>
+                    </div>
+                </div>
+
+                <!-- KPI 4: Langste Reeks Stil -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <span id="kpi-title-streak" class="text-xs font-medium text-slate-400">Langste Reeks Stil</span>
+                        <div class="w-8 h-8 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-2xl sm:text-3xl font-bold font-mono text-white" id="kpi-longest-streak">05:20</div>
+                        <p class="text-xs text-slate-400 mt-1" id="kpi-streak-range">Van 02:37 tot 07:57</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactieve Visuele Tijdlijn -->
+            <section class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h3 id="timeline-title" class="text-base font-semibold text-white">Interactieve Sessie-Tijdlijn</h3>
+                        <p id="timeline-subtitle" class="text-xs text-slate-400">Beweeg over of klik op een markering om de details van dat moment te bekijken.</p>
+                    </div>
+                    <!-- Legenda -->
+                    <div class="flex flex-wrap items-center gap-3 text-xs">
+                        <span class="flex items-center gap-1.5 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span><span id="legend-encourage">Aanmoediging</span></span>
+                        <span class="flex items-center gap-1.5 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span><span id="legend-scold">Waarschuwing</span></span>
+                        <span class="flex items-center gap-1.5 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span><span id="legend-penalize">Straftijd</span></span>
+                    </div>
+                </div>
+
+                <!-- Tijdlijn Balk Container -->
+                <div class="pt-8 pb-6 px-2 sm:px-4">
+                    <div class="relative h-4 bg-slate-800 rounded-full border border-slate-700/80 shadow-inner" id="timeline-track">
+                        <!-- Dynamisch ingevulde segmenten & markers via JS -->
+                    </div>
+                    <!-- Tijdlabels onder balk -->
+                    <div class="flex justify-between text-[11px] font-mono text-slate-500 mt-3" id="timeline-axis">
+                        <span>00:00</span>
+                        <span>02:13</span>
+                        <span>04:27</span>
+                        <span>06:40</span>
+                        <span>08:54</span>
+                    </div>
+                </div>
+
+                <!-- Geselecteerd Event Detail Balkje -->
+                <div id="timeline-inspector" class="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+                    <div class="flex items-center gap-3">
+                        <span id="inspector-badge" class="px-2.5 py-1 rounded-md font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">Start</span>
+                        <div>
+                            <span id="inspector-time-label" class="text-slate-400">Tijdstip:</span>
+                            <span id="inspector-time" class="font-mono font-semibold text-white ml-1">00:00</span>
+                            <span class="text-slate-600 mx-2">|</span>
+                            <span id="inspector-desc" class="text-slate-300">De sessie is gestart.</span>
+                        </div>
+                    </div>
+                    <div id="inspector-adj" class="font-mono text-slate-400">Tijdaanpassing: 0s</div>
+                </div>
+
+                <!-- Verhoudingsbalk (Event Ratio) -->
+                <div class="pt-2 border-t border-slate-800/80">
+                    <div class="flex justify-between text-xs text-slate-400 mb-2">
+                        <span id="ratio-label">Verhouding feedback &amp; overtredingen</span>
+                        <span id="ratio-summary" class="font-mono text-slate-300">75% Positief / 25% Overtreding</span>
+                    </div>
+                    <div class="h-2.5 w-full bg-slate-800 rounded-full overflow-hidden flex" id="ratio-bar">
+                        <div class="bg-emerald-500 h-full transition-all duration-500" style="width: 75%"></div>
+                        <div class="bg-amber-400 h-full transition-all duration-500" style="width: 12.5%"></div>
+                        <div class="bg-rose-500 h-full transition-all duration-500" style="width: 12.5%"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gedetailleerd Gebeurtenissen Logboek -->
+            <section class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+                <div class="p-5 sm:p-6 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 id="log-title" class="text-base font-semibold text-white">Chronologisch Gebeurtenissenlogboek</h3>
+                        <p id="log-subtitle" class="text-xs text-slate-400">Alle geregistreerde momenten inclusief voorbereidingstijd en intervallen.</p>
+                    </div>
+
+                    <!-- Filter Knoppen -->
+                    <div class="flex flex-wrap items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800" id="event-filters">
+                        <button id="filter-all" data-filter="all" class="filter-btn active px-2.5 py-1 text-xs font-medium rounded-lg bg-indigo-600 text-white transition">Alles</button>
+                        <button id="filter-encourage" data-filter="encourage" class="filter-btn px-2.5 py-1 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition">Aanmoedigingen</button>
+                        <button id="filter-violations" data-filter="violations" class="filter-btn px-2.5 py-1 text-xs font-medium rounded-lg text-slate-400 hover:text-white transition">Overtredingen</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-800 bg-slate-950/50 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
+                                <th id="th-time" class="py-3 px-4 sm:px-6">Tijdstip</th>
+                                <th id="th-event" class="py-3 px-4">Gebeurtenis</th>
+                                <th id="th-desc" class="py-3 px-4">Omschrijving</th>
+                                <th id="th-interval" class="py-3 px-4">Interval</th>
+                                <th id="th-adj" class="py-3 px-4 sm:px-6 text-right">Tijdaanpassing</th>
+                            </tr>
+                        </thead>
+                        <tbody id="events-table-body" class="divide-y divide-slate-800/60 text-xs sm:text-sm">
+                            <!-- Rijen worden dynamisch gevuld via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Ruwe JSON Viewer (Inklapbaar) -->
+            <section class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+                <button id="btn-toggle-json" type="button" class="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-800/40 transition">
+                    <div class="flex items-center gap-2.5">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                        </svg>
+                        <span id="raw-json-title" class="text-xs sm:text-sm font-semibold text-slate-200">Gedecodeerde Ruwe JSON Bekijken</span>
+                    </div>
+                    <svg id="json-chevron" class="w-4 h-4 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div id="raw-json-container" class="hidden border-t border-slate-800 p-4 sm:p-5 bg-slate-950">
+                    <div class="flex justify-end mb-2">
+                        <button id="btn-copy-json" type="button" class="text-xs px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                            <span id="copy-json-text">Kopieer JSON</span>
+                        </button>
+                    </div>
+                    <pre id="raw-json-output" class="font-mono text-xs text-emerald-400 overflow-x-auto leading-relaxed"></pre>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        // Voorbeeldrapport van de gebruiker
+        const SAMPLE_REPORT = `-----BEGIN CORNERTIME PUNISHMENT REPORT-----
+eyJuYW1lIjoiQW5vbnltb3VzIiwicHJlc2V0VGl0bGUiOiJDdXN0b20gUHVuaXNobWVudCIsImlu
+aXRpYWxEdXJhdGlvbiI6NTI3LCJ0b3RhbER1cmF0aW9uIjo1MzQsInN0YXJ0ZWRBdCI6IjIwMjYt
+MTEtMTJUMTU6MjM6MzYuNDA1WiIsImV2ZW50cyI6W3siYWRqdXN0bWVudCI6MCwiZXZlbnRUeXBl
+IjoiZ2V0UmVhZHkiLCJ0aW1lIjotMTB9LHsiYWRqdXN0bWVudCI6MCwiZXZlbnRUeXBlIjoic3Rh
+cnQiLCJ0aW1lIjowfSx7ImV2ZW50VHlwZSI6ImVuY291cmFnZSIsImFkanVzdG1lbnQiOjAsInRp
+bWUiOjYwfSx7ImV2ZW50VHlwZSI6ImVuY291cmFnZSIsImFkanVzdG1lbnQiOjAsInRpbWUiOjEy
+MH0seyJhZGp1c3RtZW50IjowLCJldmVudFR5cGUiOiJzY29sZCIsInRpbWUiOjE1N30seyJldmVu
+dFR5cGUiOiJlbmNvdXJhZ2UiLCJhZGp1c3RtZW50IjowLCJ0aW1lIjoyNDB9LHsiZXZlbnRUeXBl
+IjoiZW5jb3VyYWdlIiwiYWRqdXN0bWVudCI6MCwidGltZSI6MzAwfSx7ImV2ZW50VHlwZSI6ImVu
+Y291cmFnZSIsImFkanVzdG1lbnQiOjAsInRpbWUiOjM2MH0seyJldmVudFR5cGUiOiJlbmNvdXJh
+Z2UiLCJhZGp1c3RtZW50IjowLCJ0aW1lIjo0MjB9LHsiYWRqdXN0bWVudCI6NywiZXZlbnRUeXBl
+IjoicGVuYWxpemUiLCJ0aW1lIjo0Nzd9LHsiYWRqdXN0bWVudCI6MCwiZXZlbnRUeXBlIjoiZW5k
+IiwidGltZSI6NTM0fV0sInZpb2xhdGlvbnMiOjJ9
+-----END CORNERTIME PUNISHMENT REPORT-----`;
+
+        // Vertaalwoordenboek (NL / EN)
+        const I18N = {
+            nl: {
+                pageTitle: 'Cornertime Rapport Analyzer',
+                headerSubtitle: 'Sessie-analyse & Logboek Visualizer',
+                loadSample: 'Laad Voorbeeldrapport',
+                loadSampleShort: 'Voorbeeld',
+                pasteNewReport: 'Nieuw Rapport Plakken',
+                hideInput: 'Invoer Verbergen',
+                inputTitle: 'Rapport Invoeren',
+                inputBadge: 'Base64 of JSON',
+                inputDesc: 'Plak het volledige <code class="text-indigo-400 font-mono">BEGIN CORNERTIME PUNISHMENT REPORT</code> blok hieronder. De analyse start automatisch.',
+                btnClear: 'Wissen',
+                btnAnalyze: 'Analyseer Rapport',
+                errEmpty: 'Het invoerveld is leeg. Plak een Cornertime rapport om te analyseren.',
+                errBase64: 'Kan de Base64-code niet decoderen. Controleer of je het volledige rapport hebt gekopieerd.',
+                errJson: 'De gedecodeerde inhoud is geen geldige JSON-structuur.',
+                errEvents: 'Het rapport mist het verwachte "events" overzicht.',
+                unknown: 'Onbekend',
+                defaultPreset: 'Standaard Sessie',
+                participantLabel: 'Deelnemer:',
+                disciplineTitle: 'Discipline Score',
+                disciplineFormulaHint: '-4% per waarschuwing, -8% per straf',
+                scoreExcellent: 'Uitstekend',
+                scoreGood: 'Netjes',
+                scoreRestless: 'Onrustig',
+                kpiDuration: 'Totale Duur',
+                planned: 'Gepland',
+                penaltyTime: 'straftijd',
+                exactOnTime: 'Exact op tijd',
+                kpiViolations: 'Overtredingen',
+                warningSing: 'waarschuwing',
+                warningPlur: 'waarschuwingen',
+                penaltySing: 'straf',
+                penaltyPlur: 'straffen',
+                kpiEncouragements: 'Aanmoedigingen',
+                avgEvery: 'Gemiddeld elke',
+                noEncouragements: 'Geen aanmoedigingen',
+                kpiStreak: 'Langste Reeks Stil',
+                from: 'Van',
+                to: 'tot',
+                timelineTitle: 'Interactieve Sessie-Tijdlijn',
+                timelineSubtitle: 'Beweeg over of klik op een markering om de details van dat moment te bekijken.',
+                legendEncourage: 'Aanmoediging',
+                legendScold: 'Waarschuwing',
+                legendPenalize: 'Straftijd',
+                inspectorTimeLabel: 'Tijdstip:',
+                timeAdjustment: 'Tijdaanpassing',
+                ratioLabel: 'Verhouding feedback & overtredingen',
+                ratioSummary: (encPct, violPct) => `${encPct}% Aanmoediging / ${violPct}% Overtreding`,
+                noMidEvents: 'Geen tussentijdse meldingen',
+                logTitle: 'Chronologisch Gebeurtenissenlogboek',
+                logSubtitle: 'Alle geregistreerde momenten inclusief voorbereidingstijd en intervallen.',
+                filterAll: 'Alles',
+                filterEncourage: 'Aanmoedigingen',
+                filterViolations: 'Overtredingen',
+                thTime: 'Tijdstip',
+                thEvent: 'Gebeurtenis',
+                thDesc: 'Omschrijving',
+                thInterval: 'Interval',
+                thAdj: 'Tijdaanpassing',
+                noFilterResults: 'Geen gebeurtenissen gevonden voor dit filter.',
+                startLabel: 'Start',
+                rawJsonTitle: 'Gedecodeerde Ruwe JSON Bekijken',
+                copyJson: 'Kopieer JSON',
+                copiedJson: 'Gekopieerd!',
+                dateLocale: 'nl-NL',
+                events: {
+                    getReady: {
+                        label: 'Voorbereiden',
+                        desc: 'Aftellen naar de startpositie in de hoek.'
+                    },
+                    start: {
+                        label: 'Start Sessie',
+                        desc: 'De timer is officieel gestart.'
+                    },
+                    encourage: {
+                        label: 'Aanmoediging',
+                        desc: 'Goed stilgestaan! Positieve bevestiging ontvangen.'
+                    },
+                    scold: {
+                        label: 'Waarschuwing',
+                        desc: 'Beweging gedetecteerd (waarschuwing zonder straftijd).'
+                    },
+                    penalize: {
+                        label: 'Straftijd',
+                        desc: (adj) => `Beweging gedetecteerd! Er is +${adj}s straftijd toegevoegd.`
+                    },
+                    end: {
+                        label: 'Einde Sessie',
+                        desc: 'De volledige straftijd is uitgezeten.'
+                    },
+                    default: {
+                        desc: 'Geregistreerde gebeurtenis.'
+                    }
+                }
+            },
+            en: {
+                pageTitle: 'Cornertime Report Analyzer',
+                headerSubtitle: 'Session Analysis & Log Visualizer',
+                loadSample: 'Load Sample Report',
+                loadSampleShort: 'Sample',
+                pasteNewReport: 'Paste New Report',
+                hideInput: 'Hide Input',
+                inputTitle: 'Input Report',
+                inputBadge: 'Base64 or JSON',
+                inputDesc: 'Paste the complete <code class="text-indigo-400 font-mono">BEGIN CORNERTIME PUNISHMENT REPORT</code> block below. Analysis starts automatically.',
+                btnClear: 'Clear',
+                btnAnalyze: 'Analyze Report',
+                errEmpty: 'The input field is empty. Paste a Cornertime report to analyze.',
+                errBase64: 'Unable to decode the Base64 string. Make sure you copied the entire report.',
+                errJson: 'The decoded content is not a valid JSON structure.',
+                errEvents: 'The report is missing the expected "events" array.',
+                unknown: 'Unknown',
+                defaultPreset: 'Standard Session',
+                participantLabel: 'Participant:',
+                disciplineTitle: 'Discipline Score',
+                disciplineFormulaHint: '-4% per warning, -8% per penalty',
+                scoreExcellent: 'Excellent',
+                scoreGood: 'Good',
+                scoreRestless: 'Restless',
+                kpiDuration: 'Total Duration',
+                planned: 'Planned',
+                penaltyTime: 'penalty',
+                exactOnTime: 'Exact on time',
+                kpiViolations: 'Violations',
+                warningSing: 'warning',
+                warningPlur: 'warnings',
+                penaltySing: 'penalty',
+                penaltyPlur: 'penalties',
+                kpiEncouragements: 'Encouragements',
+                avgEvery: 'Average every',
+                noEncouragements: 'No encouragements',
+                kpiStreak: 'Longest Still Streak',
+                from: 'From',
+                to: 'to',
+                timelineTitle: 'Interactive Session Timeline',
+                timelineSubtitle: 'Hover over or click any marker to inspect the details of that moment.',
+                legendEncourage: 'Encouragement',
+                legendScold: 'Warning',
+                legendPenalize: 'Penalty Time',
+                inspectorTimeLabel: 'Timestamp:',
+                timeAdjustment: 'Time adjustment',
+                ratioLabel: 'Feedback vs. violations ratio',
+                ratioSummary: (encPct, violPct) => `${encPct}% Encouragement / ${violPct}% Violation`,
+                noMidEvents: 'No mid-session events',
+                logTitle: 'Chronological Event Log',
+                logSubtitle: 'All recorded moments including preparation time and intervals.',
+                filterAll: 'All',
+                filterEncourage: 'Encouragements',
+                filterViolations: 'Violations',
+                thTime: 'Timestamp',
+                thEvent: 'Event',
+                thDesc: 'Description',
+                thInterval: 'Interval',
+                thAdj: 'Time Adjustment',
+                noFilterResults: 'No events found matching this filter.',
+                startLabel: 'Start',
+                rawJsonTitle: 'View Decoded Raw JSON',
+                copyJson: 'Copy JSON',
+                copiedJson: 'Copied!',
+                dateLocale: 'en-US',
+                events: {
+                    getReady: {
+                        label: 'Get Ready',
+                        desc: 'Counting down to take position in the corner.'
+                    },
+                    start: {
+                        label: 'Session Start',
+                        desc: 'The punishment timer has officially started.'
+                    },
+                    encourage: {
+                        label: 'Encouragement',
+                        desc: 'Standing still! Positive reinforcement received.'
+                    },
+                    scold: {
+                        label: 'Warning',
+                        desc: 'Movement detected (warning without penalty time).'
+                    },
+                    penalize: {
+                        label: 'Penalty Time',
+                        desc: (adj) => `Movement detected! +${adj}s penalty time added.`
+                    },
+                    end: {
+                        label: 'Session End',
+                        desc: 'The full punishment duration has been completed.'
+                    },
+                    default: {
+                        desc: 'Recorded session event.'
+                    }
+                }
+            }
+        };
+
+        let currentLang = 'nl';
+        let currentReportData = null;
+        let currentFilter = 'all';
+        let selectedEventIndex = 0;
+
+        // DOM Referenties
+        const reportInput = document.getElementById('report-input');
+        const inputPanel = document.getElementById('input-panel');
+        const errorBox = document.getElementById('error-box');
+        const errorMessage = document.getElementById('error-message');
+        const dashboardContent = document.getElementById('dashboard-content');
+
+        // Helper: Haal actieve vertaling op
+        function t() {
+            return I18N[currentLang];
+        }
+
+        // Pas statische UI-teksten aan bij taalwissel
+        function applyStaticTranslations() {
+            const tr = t();
+            document.documentElement.lang = currentLang;
+            document.title = tr.pageTitle;
+
+            document.getElementById('header-subtitle').textContent = tr.headerSubtitle;
+            document.getElementById('btn-sample-label').textContent = tr.loadSample;
+            document.getElementById('btn-sample-short').textContent = tr.loadSampleShort;
+
+            const isInputHidden = inputPanel.classList.contains('hidden');
+            document.getElementById('toggle-input-label').textContent = isInputHidden ? tr.pasteNewReport : tr.hideInput;
+
+            document.getElementById('input-title').textContent = tr.inputTitle;
+            document.getElementById('input-badge').textContent = tr.inputBadge;
+            document.getElementById('input-desc').innerHTML = tr.inputDesc;
+            document.getElementById('btn-clear').textContent = tr.btnClear;
+            document.getElementById('btn-analyze').textContent = tr.btnAnalyze;
+
+            document.getElementById('meta-participant-label').textContent = tr.participantLabel;
+            document.getElementById('discipline-title').textContent = tr.disciplineTitle;
+            document.getElementById('discipline-formula-hint').textContent = tr.disciplineFormulaHint;
+
+            document.getElementById('kpi-title-duration').textContent = tr.kpiDuration;
+            document.getElementById('kpi-title-violations').textContent = tr.kpiViolations;
+            document.getElementById('kpi-title-encouragements').textContent = tr.kpiEncouragements;
+            document.getElementById('kpi-title-streak').textContent = tr.kpiStreak;
+
+            document.getElementById('timeline-title').textContent = tr.timelineTitle;
+            document.getElementById('timeline-subtitle').textContent = tr.timelineSubtitle;
+            document.getElementById('legend-encourage').textContent = tr.legendEncourage;
+            document.getElementById('legend-scold').textContent = tr.legendScold;
+            document.getElementById('legend-penalize').textContent = tr.legendPenalize;
+            document.getElementById('inspector-time-label').textContent = tr.inspectorTimeLabel;
+            document.getElementById('ratio-label').textContent = tr.ratioLabel;
+
+            document.getElementById('log-title').textContent = tr.logTitle;
+            document.getElementById('log-subtitle').textContent = tr.logSubtitle;
+            document.getElementById('filter-all').textContent = tr.filterAll;
+            document.getElementById('filter-encourage').textContent = tr.filterEncourage;
+            document.getElementById('filter-violations').textContent = tr.filterViolations;
+
+            document.getElementById('th-time').textContent = tr.thTime;
+            document.getElementById('th-event').textContent = tr.thEvent;
+            document.getElementById('th-desc').textContent = tr.thDesc;
+            document.getElementById('th-interval').textContent = tr.thInterval;
+            document.getElementById('th-adj').textContent = tr.thAdj;
+
+            document.getElementById('raw-json-title').textContent = tr.rawJsonTitle;
+            document.getElementById('copy-json-text').textContent = tr.copyJson;
+
+            // Update styling van NL / EN knoppen
+            const btnNl = document.getElementById('lang-nl');
+            const btnEn = document.getElementById('lang-en');
+            if (currentLang === 'nl') {
+                btnNl.className = 'px-2 py-1 text-xs font-semibold rounded-md bg-indigo-600 text-white transition';
+                btnEn.className = 'px-2 py-1 text-xs font-semibold rounded-md text-slate-400 hover:text-white transition';
+            } else {
+                btnEn.className = 'px-2 py-1 text-xs font-semibold rounded-md bg-indigo-600 text-white transition';
+                btnNl.className = 'px-2 py-1 text-xs font-semibold rounded-md text-slate-400 hover:text-white transition';
+            }
+        }
+
+        // Wissel taal met behoud van huidige rapportdata
+        function setLanguage(lang) {
+            if (currentLang === lang) return;
+            currentLang = lang;
+            applyStaticTranslations();
+
+            if (currentReportData) {
+                renderDashboard(currentReportData);
+            } else if (!errorBox.classList.contains('hidden')) {
+                handleAnalyze();
+            }
+        }
+
+        // Helper: Seconden formatteren naar MM:SS (ondersteunt ook negatieve seconden zoals -00:10)
+        function formatSeconds(sec) {
+            const isNegative = sec < 0;
+            const absSec = Math.abs(Math.round(sec));
+            const mins = Math.floor(absSec / 60);
+            const remSecs = absSec % 60;
+            const formatted = `${String(mins).padStart(2, '0')}:${String(remSecs).padStart(2, '0')}`;
+            return isNegative ? `-${formatted}` : formatted;
+        }
+
+        // Helper: Vertaal eventType naar gelokaliseerde labels, kleuren en omschrijvingen
+        function getEventMetadata(ev) {
+            const tr = t().events;
+            switch (ev.eventType) {
+                case 'getReady':
+                    return {
+                        label: tr.getReady.label,
+                        badgeClass: 'bg-slate-800 text-slate-300 border-slate-700',
+                        dotClass: 'bg-slate-400',
+                        desc: tr.getReady.desc
+                    };
+                case 'start':
+                    return {
+                        label: tr.start.label,
+                        badgeClass: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30',
+                        dotClass: 'bg-indigo-400',
+                        desc: tr.start.desc
+                    };
+                case 'encourage':
+                    return {
+                        label: tr.encourage.label,
+                        badgeClass: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+                        dotClass: 'bg-emerald-400',
+                        desc: tr.encourage.desc
+                    };
+                case 'scold':
+                    return {
+                        label: tr.scold.label,
+                        badgeClass: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+                        dotClass: 'bg-amber-400',
+                        desc: tr.scold.desc
+                    };
+                case 'penalize':
+                    return {
+                        label: tr.penalize.label,
+                        badgeClass: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+                        dotClass: 'bg-rose-500',
+                        desc: tr.penalize.desc(ev.adjustment)
+                    };
+                case 'end':
+                    return {
+                        label: tr.end.label,
+                        badgeClass: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+                        dotClass: 'bg-sky-400',
+                        desc: tr.end.desc
+                    };
+                default:
+                    return {
+                        label: ev.eventType,
+                        badgeClass: 'bg-slate-800 text-slate-300 border-slate-700',
+                        dotClass: 'bg-slate-400',
+                        desc: tr.default.desc
+                    };
+            }
+        }
+
+        // Parse invoer (ondersteunt zowel volledige BEGIN/END blokken, losse Base64 als directe JSON)
+        function parseReport(rawText) {
+            const tr = t();
+            const trimmed = rawText.trim();
+            if (!trimmed) {
+                throw new Error(tr.errEmpty);
+            }
+
+            let jsonString = '';
+
+            // Controleer of het al directe JSON is
+            if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+                jsonString = trimmed;
+            } else {
+                // Strip optionele BEGIN en END headers en alle regeleindes/spaties
+                const cleanedBase64 = trimmed
+                    .replace(/-----BEGIN CORNERTIME PUNISHMENT REPORT-----/g, '')
+                    .replace(/-----END CORNERTIME PUNISHMENT REPORT-----/g, '')
+                    .replace(/\s+/g, '');
+
+                try {
+                    // Decodeer Base64 naar UTF-8 string
+                    const binaryStr = atob(cleanedBase64);
+                    const bytes = new Uint8Array(binaryStr.length);
+                    for (let i = 0; i < binaryStr.length; i++) {
+                        bytes[i] = binaryStr.charCodeAt(i);
+                    }
+                    jsonString = new TextDecoder().decode(bytes);
+                } catch (e) {
+                    throw new Error(tr.errBase64);
+                }
+            }
+
+            let data;
+            try {
+                data = JSON.parse(jsonString);
+            } catch (e) {
+                throw new Error(tr.errJson);
+            }
+
+            // Valideer verplichte velden
+            if (!data || typeof data !== 'object' || !Array.isArray(data.events)) {
+                throw new Error(tr.errEvents);
+            }
+
+            return data;
+        }
+
+        // Hoofdfunctie om het dashboard te vullen
+        function renderDashboard(data) {
+            const tr = t();
+            currentReportData = data;
+            errorBox.classList.add('hidden');
+            dashboardContent.classList.remove('hidden');
+
+            // 1. Metadata Header
+            document.getElementById('meta-name').textContent = data.name || tr.unknown;
+            document.getElementById('meta-preset').textContent = data.presetTitle || tr.defaultPreset;
+
+            if (data.startedAt) {
+                const dateObj = new Date(data.startedAt);
+                if (!isNaN(dateObj)) {
+                    const formattedDate = new Intl.DateTimeFormat(tr.dateLocale, {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    }).format(dateObj);
+                    document.querySelector('#meta-date span').textContent = formattedDate;
+                }
+            }
+
+            // Bereken statistieken uit events
+            const events = [...data.events].sort((a, b) => a.time - b.time);
+            const totalDuration = data.totalDuration || (events.length ? events[events.length - 1].time : 0);
+            const initialDuration = data.initialDuration || totalDuration;
+            const extraTime = totalDuration - initialDuration;
+
+            const encourages = events.filter(e => e.eventType === 'encourage');
+            const scolds = events.filter(e => e.eventType === 'scold');
+            const penalties = events.filter(e => e.eventType === 'penalize');
+            const totalViolations = typeof data.violations === 'number' ? data.violations : (scolds.length + penalties.length);
+
+            // 2. KPI Cards
+            document.getElementById('kpi-total-duration').textContent = formatSeconds(totalDuration);
+
+            const diffEl = document.getElementById('kpi-duration-diff');
+            if (extraTime > 0) {
+                diffEl.innerHTML = `<span>${tr.planned}: ${formatSeconds(initialDuration)}</span> <span class="px-1.5 py-0.5 rounded bg-rose-500/15 text-rose-400 font-mono text-[11px]">+${extraTime}s ${tr.penaltyTime}</span>`;
+            } else if (extraTime < 0) {
+                diffEl.innerHTML = `<span>${tr.planned}: ${formatSeconds(initialDuration)}</span> <span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-mono text-[11px]">${extraTime}s</span>`;
+            } else {
+                diffEl.innerHTML = `<span>${tr.planned}: ${formatSeconds(initialDuration)}</span> <span class="px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 font-mono text-[11px]">${tr.exactOnTime}</span>`;
+            }
+
+            document.getElementById('kpi-violations').textContent = totalViolations;
+            const warningWord = scolds.length === 1 ? tr.warningSing : tr.warningPlur;
+            const penaltyWord = penalties.length === 1 ? tr.penaltySing : tr.penaltyPlur;
+            document.getElementById('kpi-violations-breakdown').innerHTML = `
+                <span class="text-amber-400">${scolds.length} ${warningWord}</span> &bull; 
+                <span class="text-rose-400">${penalties.length} ${penaltyWord}</span>
+            `;
+
+            document.getElementById('kpi-encouragements').textContent = encourages.length;
+            if (encourages.length > 0 && totalDuration > 0) {
+                const avgInterval = Math.round(totalDuration / encourages.length);
+                document.getElementById('kpi-encourage-avg').textContent = `${tr.avgEvery} ${formatSeconds(avgInterval)}`;
+            } else {
+                document.getElementById('kpi-encourage-avg').textContent = tr.noEncouragements;
+            }
+
+            // Bereken langste reeks stil (tussen start=0, overtredingen en eind=totalDuration)
+            const violationTimes = events
+                .filter(e => e.eventType === 'scold' || e.eventType === 'penalize')
+                .map(e => e.time)
+                .filter(t => t >= 0 && t <= totalDuration);
+
+            const checkpoints = [0, ...violationTimes, totalDuration];
+            let maxStreak = 0;
+            let streakStart = 0;
+            let streakEnd = totalDuration;
+
+            for (let i = 0; i < checkpoints.length - 1; i++) {
+                const gap = checkpoints[i + 1] - checkpoints[i];
+                if (gap > maxStreak) {
+                    maxStreak = gap;
+                    streakStart = checkpoints[i];
+                    streakEnd = checkpoints[i + 1];
+                }
+            }
+
+            document.getElementById('kpi-longest-streak').textContent = formatSeconds(maxStreak);
+            document.getElementById('kpi-streak-range').textContent = `${tr.from} ${formatSeconds(streakStart)} ${tr.to} ${formatSeconds(streakEnd)}`;
+
+            // Bereken Discipline Score (100% start, -4% per waarschuwing, -8% per straf)
+            const penaltyDeduction = (scolds.length * 4) + (penalties.length * 8);
+            const rawScore = Math.max(0, Math.min(100, 100 - penaltyDeduction));
+            const scoreEl = document.getElementById('discipline-score');
+            const labelEl = document.getElementById('discipline-label');
+            const iconWrap = document.getElementById('discipline-icon-wrap');
+
+            scoreEl.textContent = `${rawScore}%`;
+            if (rawScore >= 90) {
+                scoreEl.className = 'text-2xl font-bold text-emerald-400';
+                labelEl.textContent = tr.scoreExcellent;
+                iconWrap.className = 'w-11 h-11 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400';
+            } else if (rawScore >= 70) {
+                scoreEl.className = 'text-2xl font-bold text-amber-400';
+                labelEl.textContent = tr.scoreGood;
+                iconWrap.className = 'w-11 h-11 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400';
+            } else {
+                scoreEl.className = 'text-2xl font-bold text-rose-400';
+                labelEl.textContent = tr.scoreRestless;
+                iconWrap.className = 'w-11 h-11 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400';
+            }
+
+            // 3. Interactieve Tijdlijn Renderen
+            renderTimeline(events, totalDuration);
+
+            // 4. Verhoudingsbalk (Feedback vs Overtredingen)
+            const totalFeedbackEvents = encourages.length + scolds.length + penalties.length;
+            const ratioBar = document.getElementById('ratio-bar');
+            const ratioSummary = document.getElementById('ratio-summary');
+
+            if (totalFeedbackEvents > 0) {
+                const encPct = (encourages.length / totalFeedbackEvents) * 100;
+                const scoldPct = (scolds.length / totalFeedbackEvents) * 100;
+                const penPct = (penalties.length / totalFeedbackEvents) * 100;
+
+                ratioBar.innerHTML = `
+                    <div class="bg-emerald-500 h-full transition-all duration-500" style="width: ${encPct}%" title="${tr.legendEncourage}: ${encourages.length}"></div>
+                    <div class="bg-amber-400 h-full transition-all duration-500" style="width: ${scoldPct}%" title="${tr.legendScold}: ${scolds.length}"></div>
+                    <div class="bg-rose-500 h-full transition-all duration-500" style="width: ${penPct}%" title="${tr.legendPenalize}: ${penalties.length}"></div>
+                `;
+                ratioSummary.textContent = tr.ratioSummary(Math.round(encPct), Math.round(scoldPct + penPct));
+            } else {
+                ratioBar.innerHTML = `<div class="bg-slate-700 h-full w-full"></div>`;
+                ratioSummary.textContent = tr.noMidEvents;
+            }
+
+            // 5. Tabel Renderen
+            renderEventsTable(events);
+
+            // 6. Ruwe JSON vullen
+            document.getElementById('raw-json-output').textContent = JSON.stringify(data, null, 2);
+        }
+
+        // Tijdlijn met interactieve pins tekenen
+        function renderTimeline(events, totalDuration) {
+            const tr = t();
+            const track = document.getElementById('timeline-track');
+            const axis = document.getElementById('timeline-axis');
+            track.innerHTML = '';
+
+            const safeTotal = totalDuration > 0 ? totalDuration : 1;
+
+            // As-labels updaten (0%, 25%, 50%, 75%, 100%)
+            axis.innerHTML = `
+                <span>00:00</span>
+                <span>${formatSeconds(safeTotal * 0.25)}</span>
+                <span>${formatSeconds(safeTotal * 0.5)}</span>
+                <span>${formatSeconds(safeTotal * 0.75)}</span>
+                <span>${formatSeconds(safeTotal)}</span>
+            `;
+
+            // Alleen events binnen [0, totalDuration] op de hoofdbalk tonen
+            const trackEvents = events.filter(e => e.time >= 0 && e.time <= safeTotal);
+
+            trackEvents.forEach((ev, idx) => {
+                const pct = Math.min(100, Math.max(0, (ev.time / safeTotal) * 100));
+                const meta = getEventMetadata(ev);
+
+                const pinBtn = document.createElement('button');
+                pinBtn.type = 'button';
+                pinBtn.style.left = `${pct}%`;
+                pinBtn.className = 'group absolute top-1/2 -translate-x-1/2 -translate-y-1/2 focus:outline-none z-10';
+                pinBtn.setAttribute('aria-label', `${meta.label} - ${formatSeconds(ev.time)}`);
+
+                // Bepaal grootte & stijl van de pin
+                let pinVisual = '';
+                if (ev.eventType === 'penalize') {
+                    pinVisual = `
+                        <span class="absolute -top-7 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded bg-rose-500 text-white font-mono text-[10px] font-bold shadow-md whitespace-nowrap">
+                            +${ev.adjustment}s
+                        </span>
+                        <span class="block w-4 h-4 rounded-full bg-rose-500 ring-4 ring-rose-500/30 group-hover:scale-125 transition-transform"></span>
+                    `;
+                } else if (ev.eventType === 'scold') {
+                    pinVisual = `
+                        <span class="block w-3.5 h-3.5 rounded-full bg-amber-400 ring-4 ring-amber-400/25 group-hover:scale-125 transition-transform"></span>
+                    `;
+                } else if (ev.eventType === 'encourage') {
+                    pinVisual = `
+                        <span class="block w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-slate-900 group-hover:scale-150 transition-transform"></span>
+                    `;
+                } else {
+                    pinVisual = `
+                        <span class="block w-2.5 h-2.5 rounded-full bg-indigo-400 ring-2 ring-slate-900 group-hover:scale-150 transition-transform"></span>
+                    `;
+                }
+
+                // Hover tooltip
+                pinVisual += `
+                    <div class="pointer-events-none opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 bg-slate-950 border border-slate-700 text-white text-[11px] rounded-lg px-2.5 py-1.5 shadow-xl whitespace-nowrap z-20">
+                        <div class="font-semibold">${meta.label}</div>
+                        <div class="font-mono text-slate-400">${formatSeconds(ev.time)}${ev.adjustment ? ` (+${ev.adjustment}s)` : ''}</div>
+                    </div>
+                `;
+
+                pinBtn.innerHTML = pinVisual;
+
+                // Update inspector bij hover of klik
+                const updateInspector = () => {
+                    selectedEventIndex = idx;
+                    const badge = document.getElementById('inspector-badge');
+                    badge.textContent = meta.label;
+                    badge.className = `px-2.5 py-1 rounded-md font-semibold border ${meta.badgeClass}`;
+                    document.getElementById('inspector-time').textContent = formatSeconds(ev.time);
+                    document.getElementById('inspector-desc').textContent = meta.desc;
+                    document.getElementById('inspector-adj').textContent = ev.adjustment > 0
+                        ? `${tr.timeAdjustment}: +${ev.adjustment}s`
+                        : `${tr.timeAdjustment}: 0s`;
+                };
+
+                pinBtn.addEventListener('mouseenter', updateInspector);
+                pinBtn.addEventListener('click', updateInspector);
+
+                track.appendChild(pinBtn);
+
+                // Herstel geselecteerde inspector item (of eerste event standaard)
+                if (idx === Math.min(selectedEventIndex, trackEvents.length - 1)) {
+                    updateInspector();
+                }
+            });
+        }
+
+        // Gebeurtenissentabel vullen met filterondersteuning
+        function renderEventsTable(events) {
+            const tr = t();
+            const tbody = document.getElementById('events-table-body');
+            tbody.innerHTML = '';
+
+            // Bereken eerst alle intervallen op de volledige chronologische lijst
+            const enrichedEvents = events.map((ev, index) => {
+                const prevTime = index > 0 ? events[index - 1].time : null;
+                const interval = prevTime !== null ? ev.time - prevTime : null;
+                return { ...ev, interval };
+            });
+
+            // Pas actief filter toe
+            const filtered = enrichedEvents.filter(ev => {
+                if (currentFilter === 'encourage') return ev.eventType === 'encourage';
+                if (currentFilter === 'violations') return ev.eventType === 'scold' || ev.eventType === 'penalize';
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-slate-500 text-xs">${tr.noFilterResults}</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filtered.forEach(ev => {
+                const meta = getEventMetadata(ev);
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-800/35 transition-colors';
+
+                const adjHtml = ev.adjustment > 0
+                    ? `<span class="inline-flex items-center px-2 py-0.5 rounded font-mono text-xs font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/30">+${ev.adjustment}s</span>`
+                    : `<span class="text-slate-600 font-mono text-xs">-</span>`;
+
+                const intervalHtml = ev.interval !== null
+                    ? `<span class="font-mono text-xs text-slate-400">+${formatSeconds(ev.interval)}</span>`
+                    : `<span class="text-slate-600 text-xs">${tr.startLabel}</span>`;
+
+                row.innerHTML = `
+                    <td class="py-3 px-4 sm:px-6 font-mono font-medium text-slate-200 whitespace-nowrap">${formatSeconds(ev.time)}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-medium border ${meta.badgeClass}">
+                            <span class="w-1.5 h-1.5 rounded-full ${meta.dotClass}"></span>
+                            ${meta.label}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-slate-300 text-xs sm:text-sm">${meta.desc}</td>
+                    <td class="py-3 px-4 whitespace-nowrap">${intervalHtml}</td>
+                    <td class="py-3 px-4 sm:px-6 text-right whitespace-nowrap">${adjHtml}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Analyse triggeren vanuit textarea
+        function handleAnalyze() {
+            try {
+                const data = parseReport(reportInput.value);
+                selectedEventIndex = 0;
+                renderDashboard(data);
+            } catch (err) {
+                errorMessage.textContent = err.message;
+                errorBox.classList.remove('hidden');
+            }
+        }
+
+        // Event Listeners voor Taalwisselaar
+        document.getElementById('lang-nl').addEventListener('click', () => setLanguage('nl'));
+        document.getElementById('lang-en').addEventListener('click', () => setLanguage('en'));
+
+        // Event Listeners voor Invoer & Acties
+        reportInput.addEventListener('input', () => {
+            if (reportInput.value.trim()) {
+                handleAnalyze();
+            }
+        });
+
+        document.getElementById('btn-analyze').addEventListener('click', handleAnalyze);
+
+        document.getElementById('btn-load-sample').addEventListener('click', () => {
+            reportInput.value = SAMPLE_REPORT;
+            handleAnalyze();
+        });
+
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            reportInput.value = '';
+            errorBox.classList.add('hidden');
+            reportInput.focus();
+        });
+
+        // Inklapbaar invoerpaneel
+        document.getElementById('btn-toggle-input').addEventListener('click', () => {
+            const tr = t();
+            const isHidden = inputPanel.classList.toggle('hidden');
+            document.getElementById('toggle-input-label').textContent = isHidden ? tr.pasteNewReport : tr.hideInput;
+            if (!isHidden) {
+                reportInput.focus();
+            }
+        });
+
+        // Tabel filters
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => {
+                    b.classList.remove('bg-indigo-600', 'text-white');
+                    b.classList.add('text-slate-400');
+                });
+                btn.classList.add('bg-indigo-600', 'text-white');
+                btn.classList.remove('text-slate-400');
+
+                currentFilter = btn.dataset.filter;
+                if (currentReportData) {
+                    const sortedEvents = [...currentReportData.events].sort((a, b) => a.time - b.time);
+                    renderEventsTable(sortedEvents);
+                }
+            });
+        });
+
+        // Ruwe JSON uitklappen
+        document.getElementById('btn-toggle-json').addEventListener('click', () => {
+            const container = document.getElementById('raw-json-container');
+            const chevron = document.getElementById('json-chevron');
+            const isHidden = container.classList.toggle('hidden');
+            chevron.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(180deg)';
+        });
+
+        // Kopieer JSON naar klembord (met fallback voor iframes)
+        document.getElementById('btn-copy-json').addEventListener('click', () => {
+            const tr = t();
+            const jsonText = document.getElementById('raw-json-output').textContent;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = jsonText;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const label = document.getElementById('copy-json-text');
+            label.textContent = tr.copiedJson;
+            setTimeout(() => {
+                label.textContent = t().copyJson;
+            }, 2000);
+        });
+
+        // Laad direct bij opstarten het voorbeeldrapport zodat het dashboard meteen zichtbaar is
+        window.addEventListener('DOMContentLoaded', () => {
+            applyStaticTranslations();
+            reportInput.value = SAMPLE_REPORT;
+            handleAnalyze();
+        });
+    </script>
+</body>
+</html>
