@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cornertime — Eindbeoordeling / Verdict</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0b0f19;
+      color: #f8fafc;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .fade-in {
+      animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+  <!-- Top Navigatie -->
+  <header class="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md sticky top-0 z-20">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <span class="font-bold tracking-tight text-slate-100 text-base block leading-none">Cornertime</span>
+          <span id="ui-subtitle" class="text-[11px] text-slate-400 font-medium">Eindbeoordeling</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="https://cornertime.github.io/" target="_blank" rel="noopener noreferrer" id="ui-app-link" class="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-indigo-400 transition-colors">
+          <span>Open Cornertime</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+          </svg>
+        </a>
+
+        <!-- Taalswitch NL / EN -->
+        <div class="inline-flex rounded-lg bg-slate-900 p-1 border border-slate-800" role="group">
+          <button type="button" id="btn-lang-nl" onclick="setLanguage('nl')" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-all bg-indigo-600 text-white shadow-sm">
+            NL
+          </button>
+          <button type="button" id="btn-lang-en" onclick="setLanguage('en')" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-all text-slate-400 hover:text-slate-200">
+            EN
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hoofdinhoud -->
+  <main class="max-w-3xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex-1">
+    
+    <!-- Invoer Sectie -->
+    <section class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+        <label for="report-input" id="ui-input-label" class="text-sm font-semibold text-slate-200">
+          Plak hier je Cornertime Punishment Report
+        </label>
+        <button type="button" onclick="clearInput()" id="ui-clear-btn" class="text-xs text-slate-400 hover:text-slate-200 self-start sm:self-auto transition-colors">
+          Wissen
+        </button>
+      </div>
+
+      <textarea
+        id="report-input"
+        rows="4"
+        placeholder="-----BEGIN CORNERTIME PUNISHMENT REPORT-----&#10;eyJuYW1lIjoi...&#10;-----END CORNERTIME PUNISHMENT REPORT-----"
+        class="w-full bg-slate-950/90 border border-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 rounded-xl p-3.5 text-xs mono text-slate-300 placeholder-slate-600 outline-none transition-all resize-y"
+      ></textarea>
+
+      <!-- Foutmelding -->
+      <div id="error-box" class="hidden mt-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+        <svg class="w-4 h-4 shrink-0 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+        </svg>
+        <span id="error-text">Ongeldig rapport.</span>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <button
+          type="button"
+          onclick="evaluateReport()"
+          id="ui-eval-btn"
+          class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white font-semibold text-sm shadow-lg shadow-indigo-600/25 transition-all flex items-center justify-center gap-2"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Beoordeel sessie</span>
+        </button>
+
+        <!-- Testknoppen voor snelle demo -->
+        <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
+          <span id="ui-demo-label" class="text-slate-500 mr-1">Testvoorbeeld:</span>
+          <button type="button" onclick="loadSample('pass')" id="ui-sample-pass" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/20 transition-colors">
+            Uitstekend
+          </button>
+          <button type="button" onclick="loadSample('warn')" id="ui-sample-warn" class="px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 transition-colors">
+            Kan beter
+          </button>
+          <button type="button" onclick="loadSample('fail')" id="ui-sample-fail" class="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 transition-colors">
+            Opnieuw doen
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Resultaat / Verdict Kaart -->
+    <section id="verdict-container" class="hidden fade-in">
+      <div id="verdict-card" class="rounded-3xl border p-6 sm:p-10 shadow-2xl relative overflow-hidden transition-all">
+        
+        <!-- Decoratieve achtergrondgloed -->
+        <div id="verdict-glow" class="absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl opacity-20 pointer-events-none"></div>
+
+        <!-- Status Badge & Icoon -->
+        <div class="flex flex-col items-center text-center relative z-10">
+          <div id="verdict-icon-wrap" class="w-20 h-20 rounded-2xl flex items-center justify-center mb-5 shadow-lg border">
+            <!-- Icoon wordt via JS ingevuld -->
+          </div>
+
+          <span id="verdict-badge" class="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 border">
+            Status
+          </span>
+
+          <h1 id="verdict-title" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-4">
+            Titel van beoordeling
+          </h1>
+
+          <!-- Optionele herkende switches (Houding, Zwaarte, Attributen) -->
+          <div id="parsed-tags-container" class="hidden flex-wrap items-center justify-center gap-2 mb-6">
+            <!-- Badges worden hier geplaatst als er een tag in de naam/titel staat -->
+          </div>
+
+          <!-- Hoofdboodschap -->
+          <div class="max-w-xl mx-auto space-y-4 text-slate-200 text-base sm:text-lg leading-relaxed">
+            <p id="verdict-message"></p>
+            <p id="verdict-submessage" class="text-sm sm:text-base text-slate-400"></p>
+          </div>
+
+          <!-- Compacte sessie-samenvatting (geen droge grafieken, puur context) -->
+          <div class="mt-8 pt-6 border-t border-slate-800/80 w-full max-w-md flex items-center justify-around text-center">
+            <div>
+              <span id="ui-meta-duration-label" class="block text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Totale tijd</span>
+              <span id="meta-duration" class="text-base font-bold text-slate-200 mt-0.5 block">0m 00s</span>
+            </div>
+            <div class="h-8 w-px bg-slate-800"></div>
+            <div>
+              <span id="ui-meta-movements-label" class="block text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Bewegingen</span>
+              <span id="meta-movements" class="text-base font-bold text-slate-200 mt-0.5 block">0</span>
+            </div>
+            <div id="meta-extra-wrap" class="contents">
+              <div class="h-8 w-px bg-slate-800"></div>
+              <div>
+                <span id="ui-meta-penalty-label" class="block text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Straftijd</span>
+                <span id="meta-penalty" class="text-base font-bold text-slate-200 mt-0.5 block">+0s</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actieknop onderaan -->
+          <div class="mt-8">
+            <a
+              href="https://cornertime.github.io/"
+              target="_blank"
+              rel="noopener noreferrer"
+              id="verdict-cta"
+              class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all shadow-lg"
+            >
+              <span id="verdict-cta-text">Ga naar Cornertime</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-500">
+    <a href="https://cornertime.github.io/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-400 transition-colors">
+      https://cornertime.github.io/
+    </a>
+  </footer>
+
+  <script>
+    let currentLang = 'nl';
+    let lastParsedReport = null;
+
+    const i18n = {
+      nl: {
+        subtitle: 'Eindbeoordeling',
+        appLink: 'Open Cornertime',
+        inputLabel: 'Plak hier je Cornertime Punishment Report',
+        clearBtn: 'Wissen',
+        evalBtn: 'Beoordeel sessie',
+        demoLabel: 'Testvoorbeeld:',
+        samplePass: 'Uitstekend',
+        sampleWarn: 'Kan beter',
+        sampleFail: 'Opnieuw doen',
+        errorInvalid: 'Kon geen geldig Cornertime-rapport vinden. Controleer of je het volledige blok inclusief BEGIN en END hebt geplakt.',
+        metaDuration: 'Totale tijd',
+        metaMovements: 'Bewegingen',
+        metaPenalty: 'Straftijd',
+        postureS: 'Staand',
+        postureK: 'Geknield',
+        severityL: 'Lichte straf',
+        severityH: 'Zware straf',
+        acc: {
+          C: 'Clothing',
+          N: 'Nude',
+          B: 'Blindfold',
+          H: 'Handcuffs',
+          P: 'Nipple Clamps'
+        },
+        verdicts: {
+          pass: {
+            badge: 'Geslaagd — Uitstekend',
+            title: (name) => name ? `Heel goed gedaan, ${name}!` : 'Heel goed gedaan!',
+            message: (ctx) => {
+              let base = `Bedankt voor het netjes en gedisciplineerd stilstaan gedurende ${ctx.durationText}. `;
+              if (ctx.violations === 0) {
+                base += `Je hebt geen enkele beweging gemaakt en de volledige tijd zonder fouten uitgezeten.`;
+              } else {
+                base += `Op één klein momentje van onrust na heb je je uitstekend beheerst en de sessie waardig afgerond.`;
+              }
+              return base;
+            },
+            submessage: (ctx) => {
+              if (ctx.tags) {
+                return `Zelfs ${ctx.tags.posture === 'K' ? 'geknield' : 'staand'} met de ingestelde voorwaarden (${ctx.tags.accText}) heb je laten zien dat je volledige zelfcontrole hebt. Je mag trots zijn op dit resultaat.`;
+              }
+              return `Je hebt laten zien dat je over goede zelfbeheersing beschikt. De sessie is hiermee succesvol afgerond.`;
+            },
+            cta: 'Terug naar Cornertime'
+          },
+          warn: {
+            badge: 'Voldoende — Kan beter',
+            title: (name) => name ? `Het ging redelijk, ${name}, maar het moet beter` : 'Het ging redelijk, maar het moet beter',
+            message: (ctx) => {
+              return `Je hebt de sessie van ${ctx.durationText} weliswaar uitgediend, maar je bent ${ctx.violations} keer betrapt op bewegen${ctx.penalty > 0 ? ` (wat je ${ctx.penalty} seconden extra straftijd heeft opgeleverd)` : ''}.`;
+            },
+            submessage: (ctx) => {
+              if (ctx.tags) {
+                return `Het was ${ctx.tags.posture === 'K' ? 'geknield' : 'staand'} (${ctx.tags.accText}) zichtbaar lastig om echt roerloos te blijven. Je hoeft hem nu niet direct over te doen, maar de volgende keer wordt er meer rust en discipline verwacht.`;
+              }
+              return `Dat was nog niet strak genoeg. Je hoeft de sessie nu niet opnieuw te doen, maar zorg ervoor dat je de volgende keer echt stil blijft staan.`;
+            },
+            cta: 'Naar Cornertime'
+          },
+          fail: {
+            badge: 'Onvoldoende — Opnieuw doen',
+            title: (name) => name ? `Te veel bewogen, ${name}` : 'Te veel bewogen',
+            message: (ctx) => {
+              return `Dit was helaas niet goed genoeg. Tijdens deze sessie heb je ${ctx.violations} keer bewogen${ctx.penalty > 0 ? ` en maar liefst ${ctx.penalty} seconden aan straftijd verzameld` : ''}.`;
+            },
+            submessage: (ctx) => {
+              if (ctx.tags) {
+                return `Ondanks de opstelling (${ctx.tags.posture === 'K' ? 'geknield' : 'staand'}, ${ctx.tags.accText}) was er veel te veel onrust. Deze poging telt niet als geslaagd — herpak jezelf en doe de sessie opnieuw.`;
+              }
+              return `Je hebt te vaak bewogen om dit goed te keuren. Deze sessie telt niet: ga terug en doe hem overnieuw, en dit keer echt stilstaan.`;
+            },
+            cta: 'Sessie opnieuw starten'
+          }
+        }
+      },
+      en: {
+        subtitle: 'Final Verdict',
+        appLink: 'Open Cornertime',
+        inputLabel: 'Paste your Cornertime Punishment Report here',
+        clearBtn: 'Clear',
+        evalBtn: 'Evaluate session',
+        demoLabel: 'Test sample:',
+        samplePass: 'Excellent',
+        sampleWarn: 'Could be better',
+        sampleFail: 'Do it again',
+        errorInvalid: 'Could not find a valid Cornertime report. Please make sure you pasted the entire block including BEGIN and END.',
+        metaDuration: 'Total time',
+        metaMovements: 'Movements',
+        metaPenalty: 'Penalty time',
+        postureS: 'Standing',
+        postureK: 'Kneeling',
+        severityL: 'Light penalty',
+        severityH: 'Heavy penalty',
+        acc: {
+          C: 'Clothing',
+          N: 'Nude',
+          B: 'Blindfold',
+          H: 'Handcuffs',
+          P: 'Nipple Clamps'
+        },
+        verdicts: {
+          pass: {
+            badge: 'Passed — Excellent',
+            title: (name) => name ? `Very well done, ${name}!` : 'Very well done!',
+            message: (ctx) => {
+              let base = `Thank you for standing still with great discipline for ${ctx.durationText}. `;
+              if (ctx.violations === 0) {
+                base += `You didn't move a muscle and completed the entire session without a single mistake.`;
+              } else {
+                base += `Aside from one brief moment of restlessness, you maintained great control and finished the session properly.`;
+              }
+              return base;
+            },
+            submessage: (ctx) => {
+              if (ctx.tags) {
+                return `Even while ${ctx.tags.posture === 'K' ? 'kneeling' : 'standing'} under the configured conditions (${ctx.tags.accText}), you proved your self-control. You can be proud of this result.`;
+              }
+              return `You showed genuine self-control. This session is hereby officially completed.`;
+            },
+            cta: 'Back to Cornertime'
+          },
+          warn: {
+            badge: 'Acceptable — Must do better',
+            title: (name) => name ? `It went okay, ${name}, but you must do better next time` : 'It went okay, but you must do better next time',
+            message: (ctx) => {
+              return `You made it through the ${ctx.durationText} session, but you were caught moving ${ctx.violations} time${ctx.violations === 1 ? '' : 's'}${ctx.penalty > 0 ? ` (adding ${ctx.penalty} seconds of extra penalty time)` : ''}.`;
+            },
+            submessage: (ctx) => {
+              if (ctx.tags) {
+                return `Staying completely motionless while ${ctx.tags.posture === 'K' ? 'kneeling' : 'standing'} (${ctx.tags.accText}) proved a bit too tempting to fidget. You don't have to repeat it right now, but better discipline is expected next time.`;
+              }
+              return `That wasn't quite steady enough. You don't have to redo it right now, but make sure you stay truly still next time.`;
+            },
+            cta: 'Go to Cornertime'
+          },
+          fail: {
+            badge: 'Failed — Do it over',
+            title: (name) => name ? `Too much movement, ${name}` : 'Too much movement',
+            message: (ctx) => {
+              return `Unfortunately, this was not good enough. During this session you moved ${ctx.violations} time${ctx.violations === 1 ? '' : 's'}${ctx.penalty > 0 ? ` and accumulated ${ctx.penalty} seconds in penalty time` : ''}.`;
+            },
+            submessage: (ctx) => {
+              if (ctx.tags) {
+                return `Despite the setup (${ctx.tags.posture === 'K' ? 'kneeling' : 'standing'}, ${ctx.tags.accText}), there was far too much restlessness. This attempt does not count — compose yourself and do it over.`;
+              }
+              return `You moved way too much for this to pass. This session does not count: go back and do it over, and stay still this time.`;
+            },
+            cta: 'Restart session'
+          }
+        }
+      }
+    };
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const t = i18n[lang];
+
+      // Update knoppenstijl
+      const btnNl = document.getElementById('btn-lang-nl');
+      const btnEn = document.getElementById('btn-lang-en');
+      if (lang === 'nl') {
+        btnNl.className = 'px-2.5 py-1 text-xs font-semibold rounded-md transition-all bg-indigo-600 text-white shadow-sm';
+        btnEn.className = 'px-2.5 py-1 text-xs font-semibold rounded-md transition-all text-slate-400 hover:text-slate-200';
+      } else {
+        btnEn.className = 'px-2.5 py-1 text-xs font-semibold rounded-md transition-all bg-indigo-600 text-white shadow-sm';
+        btnNl.className = 'px-2.5 py-1 text-xs font-semibold rounded-md transition-all text-slate-400 hover:text-slate-200';
+      }
+
+      // Update statische UI-teksten
+      document.getElementById('ui-subtitle').textContent = t.subtitle;
+      document.getElementById('ui-app-link').querySelector('span').textContent = t.appLink;
+      document.getElementById('ui-input-label').textContent = t.inputLabel;
+      document.getElementById('ui-clear-btn').textContent = t.clearBtn;
+      document.getElementById('ui-eval-btn').querySelector('span').textContent = t.evalBtn;
+      document.getElementById('ui-demo-label').textContent = t.demoLabel;
+      document.getElementById('ui-sample-pass').textContent = t.samplePass;
+      document.getElementById('ui-sample-warn').textContent = t.sampleWarn;
+      document.getElementById('ui-sample-fail').textContent = t.sampleFail;
+      document.getElementById('ui-meta-duration-label').textContent = t.metaDuration;
+      document.getElementById('ui-meta-movements-label').textContent = t.metaMovements;
+      document.getElementById('ui-meta-penalty-label').textContent = t.metaPenalty;
+
+      // Her-render resultaat indien al ingeladen
+      if (lastParsedReport) {
+        renderVerdict(lastParsedReport);
+      }
+    }
+
+    function formatDuration(seconds, lang) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      if (lang === 'nl') {
+        if (mins === 0) return `${secs} seconden`;
+        if (secs === 0) return `${mins} ${mins === 1 ? 'minuut' : 'minuten'}`;
+        return `${mins}m ${secs.toString().padStart(2, '0')}s`;
+      } else {
+        if (mins === 0) return `${secs} seconds`;
+        if (secs === 0) return `${mins} ${mins === 1 ? 'minute' : 'minutes'}`;
+        return `${mins}m ${secs.toString().padStart(2, '0')}s`;
+      }
+    }
+
+    /**
+     * Haalt optioneel de [S/K-L/H-CNBHP] tag uit name of presetTitle,
+     * en geeft zowel de opgeschoonde naam als de herkende switches terug.
+     */
+    function extractMetadataFromNames(nameStr, titleStr) {
+      const combined = `${nameStr || ''} ${titleStr || ''}`;
+      const tagRegex = /\[([SK])-([LH])-([A-Z]+)\]/i;
+      const match = combined.match(tagRegex);
+
+      // Verwijder eventuele tag uit de weergavenaam
+      let cleanName = (nameStr || '').replace(tagRegex, '').trim();
+      if (!cleanName || cleanName.toLowerCase() === 'anonymous') {
+        cleanName = '';
+      }
+
+      if (!match) {
+        return { cleanName, tags: null };
+      }
+
+      const posture = match[1].toUpperCase(); // 'S' of 'K'
+      const severity = match[2].toUpperCase(); // 'L' of 'H'
+      const rawAcc = match[3].toUpperCase();
+
+      const accCodes = rawAcc === 'NONE'
+        ? []
+        : rawAcc.split('').filter(c => ['C', 'N', 'B', 'H', 'P'].includes(c));
+
+      return {
+        cleanName,
+        tags: { posture, severity, accCodes }
+      };
+    }
+
+    function decodeReport(rawText) {
+      const cleaned = rawText
+        .replace(/-----BEGIN CORNERTIME PUNISHMENT REPORT-----/g, '')
+        .replace(/-----END CORNERTIME PUNISHMENT REPORT-----/g, '')
+        .replace(/\s+/g, '');
+
+      if (!cleaned) return null;
+
+      try {
+        const binary = atob(cleaned);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        const jsonStr = new TextDecoder('utf-8').decode(bytes);
+        const data = JSON.parse(jsonStr);
+
+        if (typeof data !== 'object' || data === null || !Array.isArray(data.events)) {
+          return null;
+        }
+        return data;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function evaluateReport() {
+      const input = document.getElementById('report-input').value;
+      const errorBox = document.getElementById('error-box');
+      const errorText = document.getElementById('error-text');
+      const verdictContainer = document.getElementById('verdict-container');
+
+      const parsed = decodeReport(input);
+      if (!parsed) {
+        errorText.textContent = i18n[currentLang].errorInvalid;
+        errorBox.classList.remove('hidden');
+        verdictContainer.classList.add('hidden');
+        return;
+      }
+
+      errorBox.classList.add('hidden');
+      lastParsedReport = parsed;
+      renderVerdict(parsed);
+    }
+
+    function renderVerdict(data) {
+      const t = i18n[currentLang];
+      const container = document.getElementById('verdict-container');
+      const card = document.getElementById('verdict-card');
+      const glow = document.getElementById('verdict-glow');
+      const iconWrap = document.getElementById('verdict-icon-wrap');
+      const badge = document.getElementById('verdict-badge');
+      const titleEl = document.getElementById('verdict-title');
+      const msgEl = document.getElementById('verdict-message');
+      const subMsgEl = document.getElementById('verdict-submessage');
+      const ctaEl = document.getElementById('verdict-cta');
+      const ctaTextEl = document.getElementById('verdict-cta-text');
+      const tagsContainer = document.getElementById('parsed-tags-container');
+
+      const initialDur = Number(data.initialDuration) || 0;
+      const totalDur = Number(data.totalDuration) || initialDur;
+      const penaltySec = Math.max(0, totalDur - initialDur);
+
+      // Tel overtredingen (uit data.violations of fallback op scold/penalize events)
+      const eventViolations = (data.events || []).filter(
+        e => e.eventType === 'scold' || e.eventType === 'penalize'
+      ).length;
+      const violations = typeof data.violations === 'number' ? data.violations : eventViolations;
+
+      // Bepaal eindcategorie: 'pass', 'warn', of 'fail'
+      // - Pass: 0 bewegingen, OF max 1 kleine waarschuwing zonder extra straftijd bij een sessie >= 5 min
+      // - Warn: 1 t/m 2 bewegingen en beperkte straftijd (<= 20s)
+      // - Fail: 3 of meer bewegingen, of > 20s straftijd
+      let outcome = 'pass';
+      if (violations === 0 && penaltySec === 0) {
+        outcome = 'pass';
+      } else if (violations === 1 && penaltySec === 0 && initialDur >= 300) {
+        outcome = 'pass';
+      } else if (violations <= 2 && penaltySec <= 20) {
+        outcome = 'warn';
+      } else {
+        outcome = 'fail';
+      }
+
+      // Haal optionele naam en switch-metadata op
+      const { cleanName, tags } = extractMetadataFromNames(data.name, data.presetTitle);
+
+      let tagContext = null;
+      tagsContainer.innerHTML = '';
+
+      if (tags) {
+        tagsContainer.classList.remove('hidden');
+        tagsContainer.classList.add('flex');
+
+        const postureLabel = tags.posture === 'K' ? t.postureK : t.postureS;
+        const severityLabel = tags.severity === 'H' ? t.severityH : t.severityL;
+        const accLabels = tags.accCodes.map(c => t.acc[c]);
+
+        const allBadges = [postureLabel, severityLabel, ...accLabels];
+        allBadges.forEach(label => {
+          const span = document.createElement('span');
+          span.className = 'px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-950/60 border border-slate-700/80 text-slate-300';
+          span.textContent = label;
+          tagsContainer.appendChild(span);
+        });
+
+        tagContext = {
+          posture: tags.posture,
+          severity: tags.severity,
+          accText: accLabels.length > 0
+            ? accLabels.join(', ')
+            : (currentLang === 'nl' ? 'geen extra attributen' : 'no extra accessories')
+        };
+      } else {
+        tagsContainer.classList.add('hidden');
+        tagsContainer.classList.remove('flex');
+      }
+
+      const ctx = {
+        durationText: formatDuration(totalDur, currentLang),
+        violations,
+        penalty: penaltySec,
+        tags: tagContext
+      };
+
+      const vText = t.verdicts[outcome];
+
+      // Pas styling aan op basis van uitkomst
+      if (outcome === 'pass') {
+        card.className = 'rounded-3xl border border-emerald-500/30 bg-gradient-to-b from-emerald-950/30 to-slate-900/90 p-6 sm:p-10 shadow-2xl relative overflow-hidden transition-all';
+        glow.className = 'absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl opacity-25 pointer-events-none bg-emerald-500';
+        iconWrap.className = 'w-20 h-20 rounded-2xl flex items-center justify-center mb-5 shadow-lg border bg-emerald-500/15 border-emerald-500/30 text-emerald-400';
+        iconWrap.innerHTML = `<svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+        badge.className = 'px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 border bg-emerald-500/15 border-emerald-500/30 text-emerald-300';
+        ctaEl.className = 'inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all shadow-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20';
+      } else if (outcome === 'warn') {
+        card.className = 'rounded-3xl border border-amber-500/30 bg-gradient-to-b from-amber-950/30 to-slate-900/90 p-6 sm:p-10 shadow-2xl relative overflow-hidden transition-all';
+        glow.className = 'absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl opacity-25 pointer-events-none bg-amber-500';
+        iconWrap.className = 'w-20 h-20 rounded-2xl flex items-center justify-center mb-5 shadow-lg border bg-amber-500/15 border-amber-500/30 text-amber-400';
+        iconWrap.innerHTML = `<svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>`;
+        badge.className = 'px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 border bg-amber-500/15 border-amber-500/30 text-amber-300';
+        ctaEl.className = 'inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all shadow-lg bg-amber-600 hover:bg-amber-500 text-white shadow-amber-600/20';
+      } else {
+        card.className = 'rounded-3xl border border-rose-500/35 bg-gradient-to-b from-rose-950/35 to-slate-900/90 p-6 sm:p-10 shadow-2xl relative overflow-hidden transition-all';
+        glow.className = 'absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl opacity-25 pointer-events-none bg-rose-500';
+        iconWrap.className = 'w-20 h-20 rounded-2xl flex items-center justify-center mb-5 shadow-lg border bg-rose-500/15 border-rose-500/30 text-rose-400';
+        iconWrap.innerHTML = `<svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+        badge.className = 'px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 border bg-rose-500/15 border-rose-500/30 text-rose-300';
+        ctaEl.className = 'inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all shadow-lg bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/25';
+      }
+
+      badge.textContent = vText.badge;
+      titleEl.textContent = vText.title(cleanName);
+      msgEl.textContent = vText.message(ctx);
+      subMsgEl.textContent = vText.submessage(ctx);
+      ctaTextEl.textContent = vText.cta;
+
+      // Meta-statistieken onderaan
+      document.getElementById('meta-duration').textContent = `${Math.floor(totalDur / 60)}m ${(totalDur % 60).toString().padStart(2, '0')}s`;
+      document.getElementById('meta-movements').textContent = violations;
+      document.getElementById('meta-penalty').textContent = penaltySec > 0 ? `+${penaltySec}s` : '0s';
+
+      // Trigger animatie
+      container.classList.remove('hidden');
+      container.classList.remove('fade-in');
+      void container.offsetWidth;
+      container.classList.add('fade-in');
+    }
+
+    function clearInput() {
+      document.getElementById('report-input').value = '';
+      document.getElementById('error-box').classList.add('hidden');
+      document.getElementById('verdict-container').classList.add('hidden');
+      lastParsedReport = null;
+    }
+
+    function encodeSampleObj(obj) {
+      const jsonStr = JSON.stringify(obj);
+      const bytes = new TextEncoder().encode(jsonStr);
+      let binary = '';
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      const b64 = btoa(binary);
+      const wrapped = b64.match(/.{1,76}/g).join('\n');
+      return `-----BEGIN CORNERTIME PUNISHMENT REPORT-----\n${wrapped}\n-----END CORNERTIME PUNISHMENT REPORT-----`;
+    }
+
+    function loadSample(type) {
+      let sampleObj;
+      if (type === 'pass') {
+        // Voorbeeld MET switches in de presetTitle (Geknield, Zwaar, Nude + Blindfold + Handcuffs)
+        sampleObj = {
+          name: 'Alex',
+          presetTitle: 'Custom Punishment [K-H-NBH]',
+          initialDuration: 600,
+          totalDuration: 600,
+          startedAt: new Date().toISOString(),
+          events: [
+            { adjustment: 0, eventType: 'getReady', time: -10 },
+            { adjustment: 0, eventType: 'start', time: 0 },
+            { adjustment: 0, eventType: 'encourage', time: 120 },
+            { adjustment: 0, eventType: 'encourage', time: 300 },
+            { adjustment: 0, eventType: 'encourage', time: 480 },
+            { adjustment: 0, eventType: 'end', time: 600 }
+          ],
+          violations: 0
+        };
+      } else if (type === 'warn') {
+        // Jouw originele rapport (ZONDER switches in de naam/titel)
+        sampleObj = {
+          name: 'Anonymous',
+          presetTitle: 'Custom Punishment',
+          initialDuration: 527,
+          totalDuration: 534,
+          startedAt: '2026-11-12T15:23:36.405Z',
+          events: [
+            { adjustment: 0, eventType: 'getReady', time: -10 },
+            { adjustment: 0, eventType: 'start', time: 0 },
+            { adjustment: 0, eventType: 'encourage', time: 60 },
+            { adjustment: 0, eventType: 'encourage', time: 120 },
+            { adjustment: 0, eventType: 'scold', time: 157 },
+            { adjustment: 0, eventType: 'encourage', time: 240 },
+            { adjustment: 0, eventType: 'encourage', time: 300 },
+            { adjustment: 0, eventType: 'encourage', time: 360 },
+            { adjustment: 0, eventType: 'encourage', time: 420 },
+            { adjustment: 7, eventType: 'penalize', time: 477 },
+            { adjustment: 0, eventType: 'end', time: 534 }
+          ],
+          violations: 2
+        };
+      } else {
+        // Voorbeeld MET switches (Staand, Licht, Clothing + Nipple Clamps) en te veel bewegingen
+        sampleObj = {
+          name: 'Sam',
+          presetTitle: 'Custom Punishment [S-L-CP]',
+          initialDuration: 300,
+          totalDuration: 342,
+          startedAt: new Date().toISOString(),
+          events: [
+            { adjustment: 0, eventType: 'getReady', time: -10 },
+            { adjustment: 0, eventType: 'start', time: 0 },
+            { adjustment: 10, eventType: 'penalize', time: 45 },
+            { adjustment: 0, eventType: 'scold', time: 98 },
+            { adjustment: 15, eventType: 'penalize', time: 160 },
+            { adjustment: 17, eventType: 'penalize', time: 255 },
+            { adjustment: 0, eventType: 'end', time: 342 }
+          ],
+          violations: 4
+        };
+      }
+
+      document.getElementById('report-input').value = encodeSampleObj(sampleObj);
+      evaluateReport();
+    }
+  </script>
+</body>
+</html>
