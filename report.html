@@ -7,17 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #0b0f19;
-      color: #f8fafc;
-    }
-    .mono {
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .fade-in {
-      animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
+    body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f8fafc; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .fade-in { animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
@@ -26,7 +18,6 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
 
-  <!-- Top Navigatie -->
   <header class="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md sticky top-0 z-20">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -49,23 +40,16 @@
           </svg>
         </a>
 
-        <!-- Taalswitch NL / EN -->
         <div class="inline-flex rounded-lg bg-slate-900 p-1 border border-slate-800" role="group">
-          <button type="button" id="btn-lang-nl" onclick="setLanguage('nl')" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-all bg-indigo-600 text-white shadow-sm">
-            NL
-          </button>
-          <button type="button" id="btn-lang-en" onclick="setLanguage('en')" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-all text-slate-400 hover:text-slate-200">
-            EN
-          </button>
+          <button type="button" id="btn-lang-nl" onclick="setLanguage('nl')" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-all bg-indigo-600 text-white shadow-sm">NL</button>
+          <button type="button" id="btn-lang-en" onclick="setLanguage('en')" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-all text-slate-400 hover:text-slate-200">EN</button>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Hoofdinhoud -->
   <main class="max-w-3xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 flex-1">
     
-    <!-- Invoer Sectie -->
     <section class="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
         <label for="report-input" id="ui-input-label" class="text-sm font-semibold text-slate-200">
@@ -83,7 +67,6 @@
         class="w-full bg-slate-950/90 border border-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 rounded-xl p-3.5 text-xs mono text-slate-300 placeholder-slate-600 outline-none transition-all resize-y"
       ></textarea>
 
-      <!-- Foutmelding -->
       <div id="error-box" class="hidden mt-3 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
         <svg class="w-4 h-4 shrink-0 text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
@@ -106,37 +89,25 @@
       </div>
     </section>
 
-    <!-- Resultaat / Verdict Kaart -->
     <section id="verdict-container" class="hidden fade-in">
       <div id="verdict-card" class="rounded-3xl border p-6 sm:p-10 shadow-2xl relative overflow-hidden transition-all">
         
-        <!-- Decoratieve achtergrondgloed -->
         <div id="verdict-glow" class="absolute -top-24 -right-24 w-64 h-64 rounded-full blur-3xl opacity-20 pointer-events-none"></div>
 
-        <!-- Status Badge & Icoon -->
         <div class="flex flex-col items-center text-center relative z-10">
-          <div id="verdict-icon-wrap" class="w-20 h-20 rounded-2xl flex items-center justify-center mb-5 shadow-lg border">
-            <!-- Icoon wordt via JS ingevuld -->
-          </div>
+          <div id="verdict-icon-wrap" class="w-20 h-20 rounded-2xl flex items-center justify-center mb-5 shadow-lg border"></div>
 
-          <span id="verdict-badge" class="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 border">
-            Status
-          </span>
+          <span id="verdict-badge" class="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 border">Status</span>
 
-          <h1 id="verdict-title" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-4">
-            Titel van beoordeling
-          </h1>
+          <h1 id="verdict-title" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-4">Titel van beoordeling</h1>
 
-          <!-- Optionele herkende switches -->
           <div id="parsed-tags-container" class="hidden flex-wrap items-center justify-center gap-2 mb-6"></div>
 
-          <!-- Hoofdboodschap -->
           <div class="max-w-xl mx-auto space-y-4 text-slate-200 text-base sm:text-lg leading-relaxed">
             <p id="verdict-message"></p>
             <p id="verdict-submessage" class="text-sm sm:text-base text-slate-400"></p>
           </div>
 
-          <!-- Compacte sessie-samenvatting -->
           <div class="mt-8 pt-6 border-t border-slate-800/80 w-full max-w-md flex items-center justify-around text-center">
             <div>
               <span id="ui-meta-duration-label" class="block text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Totale tijd</span>
@@ -154,15 +125,8 @@
             </div>
           </div>
 
-          <!-- Actieknop onderaan -->
           <div class="mt-8">
-            <a
-              href="https://cornertime.github.io/"
-              target="_blank"
-              rel="noopener noreferrer"
-              id="verdict-cta"
-              class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all shadow-lg"
-            >
+            <a href="https://cornertime.github.io/" target="_blank" rel="noopener noreferrer" id="verdict-cta" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all shadow-lg">
               <span id="verdict-cta-text">Ga naar Cornertime</span>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
@@ -175,11 +139,8 @@
 
   </main>
 
-  <!-- Footer -->
   <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-500">
-    <a href="https://cornertime.github.io/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-400 transition-colors">
-      https://cornertime.github.io/
-    </a>
+    <a href="https://cornertime.github.io/" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-400 transition-colors">https://cornertime.github.io/</a>
   </footer>
 
   <script>
@@ -197,39 +158,58 @@
         metaDuration: 'Totale tijd',
         metaMovements: 'Bewegingen',
         metaPenalty: 'Straftijd',
-        postureS: 'Staand',
-        postureK: 'Geknield',
-        severityL: 'Lichte straf',
-        severityH: 'Zware straf',
-        acc: { C: 'Clothing', N: 'Nude', B: 'Blindfold', H: 'Handcuffs', P: 'Nipple Clamps' },
+        acc: { C: 'met kleding aan', N: 'naakt', B: 'met blinddoek', H: 'met handboeien', P: 'met tepelklemmen' },
         verdicts: {
           pass: {
             badge: 'Geslaagd — Uitstekend',
-            title: (name) => name ? `Heel goed gedaan, ${name}!` : 'Heel goed gedaan!',
+            title: () => 'Heel goed gedaan!',
             message: (ctx) => {
-              let base = `Bedankt voor het netjes en gedisciplineerd stilstaan gedurende ${ctx.durationText}. `;
+              let details = '';
+              if (ctx.tags) {
+                const pos = ctx.tags.posture === 'K' ? 'geknield' : 'staand';
+                const accs = ctx.tags.accCodes.map(c => i18n.nl.acc[c]);
+                if (accs.length > 0) details = ` ${pos} (${accs.join(', ')})`;
+                else details = ` ${pos}`;
+              }
+              let base = `Bedankt voor het netjes en gedisciplineerd stilstaan gedurende ${ctx.durationText}${details}. `;
               if (ctx.violations === 0) {
                 base += `Je hebt geen enkele beweging gemaakt en de volledige tijd zonder fouten uitgezeten.`;
               } else {
-                base += `Gezien de totale duur van de sessie is de geringe onrust keurig binnen de marge gebleven.`;
+                base += `Gezien de omstandigheden is de geringe onrust keurig binnen de marge gebleven.`;
               }
               return base;
             },
-            submessage: (ctx) => ctx.tags ? `Zelfs ${ctx.tags.posture === 'K' ? 'geknield' : 'staand'} (${ctx.tags.accText}) heb je volledige zelfcontrole getoond. Je mag trots zijn.` : `Je hebt laten zien dat je over goede zelfbeheersing beschikt.`,
+            submessage: () => `Je hebt laten zien dat je over uitstekende zelfbeheersing beschikt.`,
             cta: 'Terug naar Cornertime'
           },
           warn: {
             badge: 'Voldoende — Kan beter',
-            title: (name) => name ? `Het ging redelijk, ${name}, maar het kan strakker` : 'Het ging redelijk, maar het kan strakker',
-            message: (ctx) => `Je hebt de sessie van ${ctx.durationText} uitgediend, maar er waren ${ctx.violations} momenten van beweging${ctx.penalty > 0 ? ` (wat ${ctx.penalty} seconden straftijd opleverde)` : ''}.`,
-            submessage: (ctx) => ctx.tags ? `Gezien de zwaarte van de opstelling (${ctx.tags.accText}) was het pittig, maar de volgende keer wordt er minder beweging verwacht.` : `Je hoeft hem niet over te doen, maar probeer de volgende keer roerloos te blijven.`,
+            title: () => 'Het ging redelijk, maar het kan strakker',
+            message: (ctx) => {
+              let details = '';
+              if (ctx.tags) {
+                const pos = ctx.tags.posture === 'K' ? 'geknield' : 'staand';
+                const accs = ctx.tags.accCodes.map(c => i18n.nl.acc[c]);
+                if (accs.length > 0) details = ` ${pos} (${accs.join(', ')})`;
+              }
+              return `Je hebt de sessie van ${ctx.durationText}${details} uitgediend, maar er waren ${ctx.violations} momenten van beweging${ctx.penalty > 0 ? ` (wat ${ctx.penalty} seconden straftijd opleverde)` : ''}.`;
+            },
+            submessage: () => `Probeer de volgende keer nog roerloos te blijven onder deze omstandigheden.`,
             cta: 'Naar Cornertime'
           },
           fail: {
             badge: 'Onvoldoende — Opnieuw doen',
-            title: (name) => name ? `Te veel bewogen, ${name}` : 'Te veel bewogen',
-            message: (ctx) => `Tijdens deze sessie van ${ctx.durationText} was er te veel onrust: ${ctx.violations} overtreding${ctx.violations === 1 ? '' : 'en'} en ${ctx.penalty} seconden straftijd.`,
-            submessage: (ctx) => ctx.tags ? `De combinatie van houding en voorwaarden vroeg om discipline die nu onvoldoende werd gehaald. Doe de sessie opnieuw.` : `Dit overschrijdt de toegestane marge voor deze tijdsduur. Ga terug en doe de sessie overnieuw.`,
+            title: () => 'Te veel bewogen',
+            message: (ctx) => {
+              let details = '';
+              if (ctx.tags) {
+                const pos = ctx.tags.posture === 'K' ? 'geknield' : 'staand';
+                const accs = ctx.tags.accCodes.map(c => i18n.nl.acc[c]);
+                if (accs.length > 0) details = ` ${pos} (${accs.join(', ')})`;
+              }
+              return `Tijdens deze sessie van ${ctx.durationText}${details} was er te veel onrust: ${ctx.violations} overtreding${ctx.violations === 1 ? '' : 'en'} en ${ctx.penalty} seconden straftijd.`;
+            },
+            submessage: () => `Dit overschrijdt de toegestane marge. Ga terug en doe de sessie overnieuw.`,
             cta: 'Sessie opnieuw starten'
           }
         }
@@ -244,39 +224,58 @@
         metaDuration: 'Total time',
         metaMovements: 'Movements',
         metaPenalty: 'Penalty time',
-        postureS: 'Standing',
-        postureK: 'Kneeling',
-        severityL: 'Light penalty',
-        severityH: 'Heavy penalty',
-        acc: { C: 'Clothing', N: 'Nude', B: 'Blindfold', H: 'Handcuffs', P: 'Nipple Clamps' },
+        acc: { C: 'clothed', N: 'nude', B: 'blindfolded', H: 'handcuffed', P: 'with nipple clamps' },
         verdicts: {
           pass: {
             badge: 'Passed — Excellent',
-            title: (name) => name ? `Very well done, ${name}!` : 'Very well done!',
+            title: () => 'Very well done!',
             message: (ctx) => {
-              let base = `Thank you for standing still with great discipline for ${ctx.durationText}. `;
+              let details = '';
+              if (ctx.tags) {
+                const pos = ctx.tags.posture === 'K' ? 'kneeling' : 'standing';
+                const accs = ctx.tags.accCodes.map(c => i18n.en.acc[c]);
+                if (accs.length > 0) details = ` while ${pos} (${accs.join(', ')})`;
+                else details = ` while ${pos}`;
+              }
+              let base = `Thank you for standing still with great discipline for ${ctx.durationText}${details}. `;
               if (ctx.violations === 0) {
                 base += `You didn't move a muscle and completed the session without a single error.`;
               } else {
-                base += `Given the total duration, the minor movements remained well within acceptable limits.`;
+                base += `Given the conditions, minor movements remained well within acceptable limits.`;
               }
               return base;
             },
-            submessage: (ctx) => ctx.tags ? `Even while ${ctx.tags.posture === 'K' ? 'kneeling' : 'standing'} (${ctx.tags.accText}), you proved your self-control.` : `You showed genuine self-control throughout.`,
+            submessage: () => `You showed genuine self-control throughout.`,
             cta: 'Back to Cornertime'
           },
           warn: {
             badge: 'Acceptable — Must do better',
-            title: (name) => name ? `It went okay, ${name}, but cleaner execution is expected` : 'It went okay, but cleaner execution is expected',
-            message: (ctx) => `You completed the ${ctx.durationText} session, but registered ${ctx.violations} movement event${ctx.violations === 1 ? '' : 's'}${ctx.penalty > 0 ? ` adding ${ctx.penalty}s in penalties` : ''}.`,
-            submessage: (ctx) => ctx.tags ? `Given the setup (${ctx.tags.accText}), it was challenging, but better discipline is expected next time.` : `You don't have to repeat it right now, but aim for complete stillness next time.`,
+            title: () => 'It went okay, but cleaner execution is expected',
+            message: (ctx) => {
+              let details = '';
+              if (ctx.tags) {
+                const pos = ctx.tags.posture === 'K' ? 'kneeling' : 'standing';
+                const accs = ctx.tags.accCodes.map(c => i18n.en.acc[c]);
+                if (accs.length > 0) details = ` while ${pos} (${accs.join(', ')})`;
+              }
+              return `You completed the ${ctx.durationText} session${details}, registering ${ctx.violations} movement event${ctx.violations === 1 ? '' : 's'}${ctx.penalty > 0 ? ` adding ${ctx.penalty}s in penalties` : ''}.`;
+            },
+            submessage: () => `Aim for complete stillness next time.`,
             cta: 'Go to Cornertime'
           },
           fail: {
             badge: 'Failed — Do it over',
-            title: (name) => name ? `Too much movement, ${name}` : 'Too much movement',
-            message: (ctx) => `During this ${ctx.durationText} session, movement was excessive: ${ctx.violations} violation${ctx.violations === 1 ? '' : 's'} and ${ctx.penalty}s in penalty time.`,
-            submessage: (ctx) => ctx.tags ? `The setup required discipline that wasn't consistently met. Please restart the session.` : `This exceeds the allowed tolerance for this duration. Go back and redo the session.`,
+            title: () => 'Too much movement',
+            message: (ctx) => {
+              let details = '';
+              if (ctx.tags) {
+                const pos = ctx.tags.posture === 'K' ? 'kneeling' : 'standing';
+                const accs = ctx.tags.accCodes.map(c => i18n.en.acc[c]);
+                if (accs.length > 0) details = ` while ${pos} (${accs.join(', ')})`;
+              }
+              return `During this ${ctx.durationText} session${details}, movement was excessive: ${ctx.violations} violation${ctx.violations === 1 ? '' : 's'} and ${ctx.penalty}s in penalty time.`;
+            },
+            submessage: () => `This exceeds the allowed tolerance. Go back and redo the session.`,
             cta: 'Restart session'
           }
         }
@@ -306,9 +305,7 @@
       document.getElementById('ui-meta-movements-label').textContent = t.metaMovements;
       document.getElementById('ui-meta-penalty-label').textContent = t.metaPenalty;
 
-      if (lastParsedReport) {
-        renderVerdict(lastParsedReport);
-      }
+      if (lastParsedReport) { renderVerdict(lastParsedReport); }
     }
 
     function formatDuration(seconds, lang) {
@@ -325,24 +322,26 @@
       }
     }
 
-    function extractMetadataFromNames(nameStr, titleStr) {
-      const combined = `${nameStr || ''} ${titleStr || ''}`;
+    function extractMetadataFromName(nameStr) {
       const tagRegex = /\[([SK])-([LH])-([A-Z]+)\]/i;
-      const match = combined.match(tagRegex);
+      let match = (nameStr || '').match(tagRegex);
 
-      let cleanName = (nameStr || '').replace(tagRegex, '').trim();
-      if (!cleanName || cleanName.toLowerCase() === 'anonymous') {
-        cleanName = '';
+      // FALLBACK NAAR BROWSER GEHEUGEN ALS DE OFFICIEVE APP DE TAG HEEFT GEWIST
+      if (!match) {
+        const storedMeta = localStorage.getItem('cornertime_active_meta');
+        if (storedMeta) {
+          match = storedMeta.match(tagRegex);
+        }
       }
 
-      if (!match) return { cleanName, tags: null };
+      if (!match) return { tags: null };
 
       const posture = match[1].toUpperCase();
       const severity = match[2].toUpperCase();
       const rawAcc = match[3].toUpperCase();
       const accCodes = rawAcc === 'NONE' ? [] : rawAcc.split('').filter(c => ['C', 'N', 'B', 'H', 'P'].includes(c));
 
-      return { cleanName, tags: { posture, severity, accCodes } };
+      return { tags: { posture, severity, accCodes } };
     }
 
     function decodeReport(rawText) {
@@ -356,17 +355,13 @@
       try {
         const binary = atob(cleaned);
         const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-          bytes[i] = binary.charCodeAt(i);
-        }
+        for (let i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
         const jsonStr = new TextDecoder('utf-8').decode(bytes);
         const data = JSON.parse(jsonStr);
 
         if (typeof data !== 'object' || data === null || !Array.isArray(data.events)) return null;
         return data;
-      } catch (e) {
-        return null;
-      }
+      } catch (e) { return null; }
     }
 
     function evaluateReport() {
@@ -410,32 +405,29 @@
       const eventViolations = (data.events || []).filter(e => e.eventType === 'scold' || e.eventType === 'penalize').length;
       const violations = typeof data.violations === 'number' ? data.violations : eventViolations;
 
-      // TIJDAFHANKELIJKE PROPORTIONELE BEOORDELING
-      // Langere sessies krijgen iets meer coulance voor een enkel incident dan korte sessies.
       let outcome = 'pass';
-      const maxAllowedPenalty = Math.round(Math.max(15, durationMins * 5)); // schaalt mee met duur
+      const maxAllowedPenalty = Math.round(Math.max(15, durationMins * 5));
 
       if (violations === 0 && penaltySec === 0) {
         outcome = 'pass';
       } else if (violations <= 1 && penaltySec <= 10 && durationMins >= 5) {
-        outcome = 'pass'; // 1 mini-incident op een lange sessie is nog steeds uitstekend/geslaagd
+        outcome = 'pass';
       } else if (violations <= Math.max(2, Math.floor(durationMins * 0.4)) && penaltySec <= maxAllowedPenalty) {
         outcome = 'warn';
       } else {
         outcome = 'fail';
       }
 
-      const { cleanName, tags } = extractMetadataFromNames(data.name, data.presetTitle);
-      let tagContext = null;
+      const { tags } = extractMetadataFromName(data.name);
       tagsContainer.innerHTML = '';
 
       if (tags) {
         tagsContainer.classList.remove('hidden');
         tagsContainer.classList.add('flex');
 
-        const postureLabel = tags.posture === 'K' ? t.postureK : t.postureS;
-        const severityLabel = tags.severity === 'H' ? t.severityH : t.severityL;
-        const accLabels = tags.accCodes.map(c => t.acc[c]);
+        const postureLabel = tags.posture === 'K' ? (currentLang === 'nl' ? 'Geknield' : 'Kneeling') : (currentLang === 'nl' ? 'Staand' : 'Standing');
+        const severityLabel = tags.severity === 'H' ? (currentLang === 'nl' ? 'Zware straf' : 'Heavy penalty') : (currentLang === 'nl' ? 'Lichte straf' : 'Light penalty');
+        const accLabels = tags.accCodes.map(c => i18n[currentLang].acc[c]);
 
         [postureLabel, severityLabel, ...accLabels].forEach(label => {
           const span = document.createElement('span');
@@ -443,12 +435,6 @@
           span.textContent = label;
           tagsContainer.appendChild(span);
         });
-
-        tagContext = {
-          posture: tags.posture,
-          severity: tags.severity,
-          accText: accLabels.length > 0 ? accLabels.join(', ') : (currentLang === 'nl' ? 'geen extra attributen' : 'no extra accessories')
-        };
       } else {
         tagsContainer.classList.add('hidden');
         tagsContainer.classList.remove('flex');
@@ -458,7 +444,7 @@
         durationText: formatDuration(totalDur, currentLang),
         violations,
         penalty: penaltySec,
-        tags: tagContext
+        tags: tags
       };
 
       const vText = t.verdicts[outcome];
@@ -487,7 +473,7 @@
       }
 
       badge.textContent = vText.badge;
-      titleEl.textContent = vText.title(cleanName);
+      titleEl.textContent = vText.title();
       msgEl.textContent = vText.message(ctx);
       subMsgEl.textContent = vText.submessage(ctx);
       ctaTextEl.textContent = vText.cta;
