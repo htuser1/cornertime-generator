@@ -537,16 +537,17 @@
         equipmentContainer.appendChild(noBadge);
       }
 
-      // Genereer de switch tag voor in het rapport
+      // Genereer de switch tag en voeg toe aan de presetTitle
       const switchTag = buildSwitchTag(pose === 'kneeling', movementSeverity === 'heavy', finalAttire);
+      const fullPresetTitle = `Custom Punishment ${switchTag}`;
 
-      // English Spoken Voice Phrases Array (inclusief de verborgen switch-tag in de startmelding)
+      // English Spoken Voice Phrases Array
       const phrases = {
         getReady: [
           "Get ready: You have been naughty. Get in the corner, facing the wall."
         ],
         start: [
-          `You better not move. I'm starting your punishment now. ${switchTag}`
+          "You better not move. I'm starting your punishment now."
         ],
         scold: [
           "Do I see you moving?"
@@ -554,7 +555,7 @@
         penalize: [
           "I warned you not to move. I'm adding some more minutes in the clock."
         ],
-        encourage: [
+        encouragement: [
           "You're doing fine. Keep it up and this will be over in no time."
         ],
         end: [
@@ -563,6 +564,7 @@
       };
 
       const cornertimePayload = {
+        presetTitle: fullPresetTitle,
         durationRange: {
           minimum: minSeconds,
           maximum: maxSeconds
